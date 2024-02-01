@@ -7,9 +7,13 @@ echo '⏳ Starting the build'
 echo "Source: $SOURCE_FILE_PATH"
 echo "Output: $OUTPUT_FILE_PATH"
 
+if !(test -d ./dist); then
+    mkdir ./dist
+fi
+
 gcc $SOURCE_FILE_PATH \
     -o $OUTPUT_FILE_PATH \
-    -I. -L./lib -lraylib -lm && \
+    -I. -L./lib -lraylib -lm -ldl -lpthread && \
 
     echo "✅ Build finished successfully!
 Output path: $OUTPUT_FILE_PATH" || \
