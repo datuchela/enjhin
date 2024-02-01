@@ -1,8 +1,8 @@
 game: 
-	./bin/build.sh
+	./build.sh
 
 run:
-	./bin/build.sh && ./dist/game
+	./build.sh && ./dist/game
 
 raylib:
 	cd ./raylib/src && \
