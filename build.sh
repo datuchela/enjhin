@@ -1,14 +1,15 @@
 #!/bin/bash
 
 SOURCE_FILE_PATH=./src/main.c
-OUTPUT_FILE_PATH=./dist/game
+OUTPUT_FILE_DIR=./dist
+OUTPUT_FILE_PATH=$OUTPUT_FILE_DIR/game
 
 echo '⏳ Starting the build'
 echo "Source: $SOURCE_FILE_PATH"
 echo "Output: $OUTPUT_FILE_PATH"
 
-if !(test -d ./dist); then
-    mkdir ./dist
+if !(test -d $OUTPUT_FILE_DIR); then
+    mkdir $OUTPUT_FILE_DIR
 fi
 
 gcc $SOURCE_FILE_PATH \
