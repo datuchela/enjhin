@@ -2,5 +2,5 @@
 
 ## todos
 1. [x] - implement Particle struct
-2. [ ] - implement Spring struct
+2. [x] - implement Spring struct
 
