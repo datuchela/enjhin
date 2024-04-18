@@ -5,7 +5,7 @@ OUTPUT_FILE_DIR=./dist
 OUTPUT_FILE_NAME=game
 OUTPUT_FILE_PATH=$OUTPUT_FILE_DIR/$OUTPUT_FILE_NAME
 
-echo '⏳ Starting the build'
+echo "⏳ Starting the build"
 echo "Source: $SOURCE_FILE_PATH"
 echo "Output: $OUTPUT_FILE_PATH"
 
@@ -19,4 +19,4 @@ gcc $SOURCE_FILE_PATH \
 
     echo "✅ Build finished successfully!
 Output path: $OUTPUT_FILE_PATH" || \
-    echo '❌ Something went wrong with the build'
+    echo "❌ Something went wrong with the build"
