@@ -1,8 +1,11 @@
 build: 
 	./build.sh
 
-run:
+debug: 
 	./build.sh && ./dist/game
+
+run:
+	./dist/game
 
 raylib:
 	cd ./lib/raylib/src && \
