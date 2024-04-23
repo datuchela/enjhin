@@ -49,6 +49,8 @@ void UpdateAllParticleAccelerations(Particle* particles, int particles_length, d
 void ClampAllParticleVelocities(Particle* particles, int particles_length);
 void ResetAllParticleForces(Particle* particles, int particles_length);
 
+Particle* FindNearestParticleV(Vector2 position, Particle* particles, int particles_length);
+void DragParticleByMouse(Particle *particle, Vector2 mouse_position, bool *is_dragging);
 
 int main(int _argc, char *_argv[]) 
 {
@@ -76,7 +78,7 @@ int main(int _argc, char *_argv[])
             (Vector2) {150.0, 150.0},
             (Vector2) {0, 0},
             (Vector2) {0, 0},
-            (Vector2) {10000, 0},
+            (Vector2) {0, 0},
             10.0
         );
     particles[3] = CreateParticle
@@ -110,11 +112,29 @@ int main(int _argc, char *_argv[])
     double time_prev;
     float simulation_speed = 1.0;
 
+    bool is_dragging = false;
+    Particle* nearest_particle;
+
     while (!WindowShouldClose())
     {
         time_prev = time_now;
         time_now = GetTime();
         double dt = (time_now - time_prev) * simulation_speed;
+
+        if(IsMouseButtonDown(0))
+        {
+            Vector2 mouse_position = GetMousePosition();
+            if(is_dragging == false)
+            {
+                nearest_particle = FindNearestParticleV(mouse_position, particles, particles_length);
+            }
+            DragParticleByMouse(nearest_particle, mouse_position, &is_dragging);
+        }
+
+        if(IsMouseButtonReleased(0))
+        {
+            is_dragging = false;
+        }
 
         BeginDrawing();
         ClearBackground(BLACK);
@@ -288,4 +308,28 @@ void ResetAllParticleForces(Particle* particles, int particles_length)
     {
         ResetParticleForces(&particles[i]);
     }
+}
+
+Particle* FindNearestParticleV(Vector2 position, Particle* particles, int particles_length)
+{
+    float closest_distance = FLT_MAX;
+    Particle* nearest_particle;
+    for(int i = 0; i < particles_length; i++)
+    {
+        float curr_distance = Vector2Distance(particles[i].position, position);
+        if(curr_distance < closest_distance)
+        {
+            closest_distance = curr_distance;
+            nearest_particle = &particles[i];
+        }
+    }
+    return nearest_particle;
+}
+
+void DragParticleByMouse(Particle *particle, Vector2 mouse_position, bool *is_dragging)
+{
+    *is_dragging = true;
+    particle->acceleration = Vector2Zero();
+    particle->velocity = Vector2Zero();
+    particle->position = mouse_position;
 }
