@@ -120,7 +120,6 @@ int main(int _argc, char *_argv[])
         ClearBackground(BLACK);
 
         DrawFPS(10, 10);
-        DEBUG_Draw_Particle_Stats(particles, particles_length);
 
         UpdateAllSprings(springs, springs_length);
         UpdateAllParticleAccelerations(particles, particles_length, dt);
@@ -130,6 +129,7 @@ int main(int _argc, char *_argv[])
 
         DrawAllSprings(springs, springs_length);
         DrawAllParticles(particles, particles_length);
+        DEBUG_Draw_Particle_Stats(particles, particles_length);
 
         ResetAllParticleForces(particles, particles_length);
 
