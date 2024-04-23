@@ -1,15 +1,16 @@
+#include <float.h>
 #include <stdio.h>
 #include "raylib.h"
 #include "raymath.h"
 
 const float MAX_VELOCITY_VALUE = 250;
-
 const float NODE_RADIUS = 5.0;
-const float DEFAULT_SPRING_STIFFNESS = 100.0;
-const float DEFAULT_SPRING_DAMPENING = 50.0;
+const float DEFAULT_SPRING_STIFFNESS = 200.0;
+const float DEFAULT_SPRING_DAMPENING = 70.0;
+const float FRICTION = 0.005;
 
-const int WINDOW_WIDTH = 800;
-const int WINDOW_HEIGHT = 600;
+const int WINDOW_WIDTH = 1000;
+const int WINDOW_HEIGHT = 800;
 
 typedef struct {
     Vector2 position;
@@ -162,13 +163,13 @@ void DEBUG_Draw_Particle_Stats(Particle* particles, int particles_length)
 {
     int line_height = 20;
     int gap = 70;
-    int left = 620;
+    int position_left = WINDOW_WIDTH - 200;
 
     for(int i = 0; i < particles_length; i++)
     {
-        DrawText(TextFormat("p%i x: %.1f y: %.1f",i, particles[i].position.x, particles[i].position.y), left, line_height + i*gap, 16, WHITE);
-        DrawText(TextFormat("vx: %.1f vy: %.1f", particles[i].velocity.x, particles[i].velocity.y), left, 2*line_height + i*gap, 16, WHITE);
-        DrawText(TextFormat("ax: %.1f ay: %.1f", particles[i].acceleration.x, particles[i].acceleration.y), left, 3*line_height + i*gap, 16, WHITE);
+        DrawText(TextFormat("p%i x: %.1f y: %.1f",i, particles[i].position.x, particles[i].position.y), position_left, line_height + i*gap, 16, WHITE);
+        DrawText(TextFormat("vx: %.1f vy: %.1f", particles[i].velocity.x, particles[i].velocity.y), position_left, 2*line_height + i*gap, 16, WHITE);
+        DrawText(TextFormat("ax: %.1f ay: %.1f", particles[i].acceleration.x, particles[i].acceleration.y), position_left, 3*line_height + i*gap, 16, WHITE);
     }
 }
 
