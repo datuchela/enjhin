@@ -183,7 +183,7 @@ Spring CreateSpring(Particle *particle1, Particle *particle2, float stiffness)
 
 void DrawSpring(Spring *spring)
 {
-    DrawLineEx(spring->particles[0]->position, spring->particles[1]->position, 3, WHITE);
+    DrawLineEx(spring->particles[0]->position, spring->particles[1]->position, 3, RAYWHITE);
 }
 
 void UpdateSpring(Spring *spring)
@@ -235,7 +235,7 @@ Particle CreateParticle(Vector2 position, Vector2 velocity, Vector2 acceleration
 
 void DrawParticle(Particle *particle)
 {
-    DrawCircleV(particle->position, NODE_RADIUS, ORANGE);
+    DrawCircleV(particle->position, NODE_RADIUS, MAGENTA);
 }
 
 void UpdateParticlePosition(Particle *particle, double dt)
