@@ -243,10 +243,16 @@ void UpdateParticlePosition(Particle *particle, double dt)
     particle->position = Vector2Add(particle->position, position_displacement); 
 }
 
+void AddParticleFriction(Particle *particle)
+{
+    particle->velocity = Vector2Scale(particle->velocity, 1 - FRICTION);
+}
+
 void UpdateParticleVelocity(Particle *particle, double dt)
 {
     Vector2 velocity_displacement = Vector2Scale(particle->acceleration, dt);
     particle->velocity = Vector2Add(particle->velocity, velocity_displacement);
+    AddParticleFriction(particle);
 }
 
 void UpdateParticleAcceleration(Particle *particle, double dt)
