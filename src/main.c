@@ -11,6 +11,22 @@ const float FRICTION = 0.005;
 
 const int WINDOW_WIDTH = 1000;
 const int WINDOW_HEIGHT = 800;
+Font font;
+
+typedef struct {
+    char *label;
+    float value;
+    char *value_format;
+} DebugInfo;
+
+DebugInfo* constants[] = {
+    &((DebugInfo) { "FRICTION", FRICTION, "%.3f" }),
+    &((DebugInfo) { "SPRING_STIFFNESS", DEFAULT_SPRING_STIFFNESS, "%.1f" }),
+    &((DebugInfo) { "SPRING_DAMPENING", DEFAULT_SPRING_DAMPENING, "%.1f" }),
+    &((DebugInfo) { "MAX_VELOCITY", MAX_VELOCITY_VALUE, "%.1f" }),
+};
+
+int constants_length = sizeof(constants) / sizeof(constants[0]);
 
 typedef struct {
     Vector2 position;
@@ -124,6 +140,8 @@ int main(int _argc, char *_argv[])
     SetTargetFPS(60);
     SetWindowMonitor(0);
 
+    font = LoadFont("assets/fonts/mecha.png");
+
     BeginDrawing();
     ClearBackground(BLACK);
     EndDrawing();
@@ -161,42 +179,56 @@ int main(int _argc, char *_argv[])
             is_dragging = false;
         }
 
-        BeginDrawing();
-        ClearBackground(BLACK);
+        UpdateSoftBody(&soft_body1, dt);
+        DrawSoftBody(&soft_body1);
 
-        DrawFPS(10, 10);
-
-        UpdateAllSprings(springs, springs_length);
-        UpdateAllParticleAccelerations(particles, particles_length, dt);
-        UpdateAllParticleVelocities(particles, particles_length, dt);
-        ClampAllParticleVelocities(particles, particles_length);
-        UpdateAllParticlePositions(particles, particles_length, dt);
-
-        DrawAllSprings(springs, springs_length);
-        DrawAllParticles(particles, particles_length);
-        DEBUG_Draw_Particle_Stats(particles, particles_length);
-
-        ResetAllParticleForces(particles, particles_length);
+        DEBUG_Draw_Stats(constants, constants_length, (Vector2){10, 30});
+        DEBUG_Draw_Particle_Stats(&soft_body1);
 
         EndDrawing();
     }
+
+    UnloadFont(font);
+    CloseWindow();
+
     return 0;
 }
 
-void DEBUG_Draw_Particle_Stats(Particle* particles, int particles_length)
+void DEBUG_Draw_Stat(char *label, float value, const char *value_format, Vector2 position)
 {
-    int line_height = 20;
-    int gap = 70;
-    int position_left = WINDOW_WIDTH - 200;
+    const char *formatted_label = TextFormat("%s: ", label);
+    const char *formatted_value = TextFormat(value_format, value);
+    DrawTextEx(font, TextFormat("%s%s", formatted_label, formatted_value), position, 16, 8, WHITE);
+}
 
-    for(int i = 0; i < particles_length; i++)
+void DEBUG_Draw_Stats(DebugInfo* debug_infos[], int debug_infos_length, Vector2 starting_position)
+{
+    int line_height = 16;
+    for(int i = 0; i < debug_infos_length; i++)
     {
-        DrawText(TextFormat("p%i x: %.1f y: %.1f",i, particles[i].position.x, particles[i].position.y), position_left, line_height + i*gap, 16, WHITE);
-        DrawText(TextFormat("vx: %.1f vy: %.1f", particles[i].velocity.x, particles[i].velocity.y), position_left, 2*line_height + i*gap, 16, WHITE);
-        DrawText(TextFormat("ax: %.1f ay: %.1f", particles[i].acceleration.x, particles[i].acceleration.y), position_left, 3*line_height + i*gap, 16, WHITE);
+        Vector2 position = Vector2Add(starting_position, (Vector2){0, line_height * i});
+        DEBUG_Draw_Stat(debug_infos[i]->label, debug_infos[i]->value, debug_infos[i]->value_format, position);
     }
 }
 
+void DEBUG_Draw_Particle_Stats(SoftBody *soft_body)
+{
+    int gap_x = 128;
+    int gap_y = 16;
+    int particle_gap_y = 64;
+    Vector2 position = { WINDOW_WIDTH - 250, 10 };
+
+    for(int i = 0; i < soft_body->particles_length; i++)
+    {
+        DEBUG_Draw_Stat("x", soft_body->particles[i].position.x, "%.1f", Vector2Add(position, (Vector2){0, 0}));
+        DEBUG_Draw_Stat("y", soft_body->particles[i].position.y, "%.1f", Vector2Add(position, (Vector2){gap_x, 0}));
+        DEBUG_Draw_Stat("vx", soft_body->particles[i].velocity.x, "%.1f", Vector2Add(position, (Vector2){0, gap_y * 1}));
+        DEBUG_Draw_Stat("vy", soft_body->particles[i].velocity.y, "%.1f", Vector2Add(position, (Vector2){gap_x, gap_y * 1}));
+        DEBUG_Draw_Stat("ax", soft_body->particles[i].velocity.x, "%.1f", Vector2Add(position, (Vector2){0, gap_y * 2}));
+        DEBUG_Draw_Stat("ay", soft_body->particles[i].velocity.y, "%.1f", Vector2Add(position, (Vector2){gap_x, gap_y * 2}));
+        position = Vector2Add(position, (Vector2){0, particle_gap_y});
+    }
+}
 
 Spring CreateSpring(Particle *particle1, Particle *particle2, float stiffness)
 {
