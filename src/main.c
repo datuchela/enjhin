@@ -11,7 +11,6 @@ const float FRICTION = 0.005;
 
 const int WINDOW_WIDTH = 1366;
 const int WINDOW_HEIGHT = 800;
-Font font;
 
 typedef struct {
     char *label;
@@ -85,6 +84,8 @@ void DragParticleByMouse(Particle *particle, Vector2 mouse_position, bool *is_dr
 SoftBody CreateSoftBody(Particle* particles, int particles_length, Spring* springs, int springs_length);
 void UpdateSoftBody(SoftBody *soft_body, double dt);
 void DrawSoftBody(SoftBody *soft_body);
+
+Font font;
 
 int main(int _argc, char *_argv[]) 
 {
