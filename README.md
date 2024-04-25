@@ -4,8 +4,8 @@ If you want to see the development in action check out my stream on twitch <http
 I have already done similar thing in [web](https://fizziks-engine.netlify.app)  
 
 ## todos
-1. [ ] - [BUG] when dragging rest of particles don't move accordingly, only after drag-release.
-2. [ ] - split up main.c into separate files
+1. [ ] - split up main.c into separate files
+2. [x] - [BUG] when dragging rest of particles don't move accordingly, only after drag-release.
 3. [x] - implement mouse interaction with Particles
 4. [x] - implement Spring struct
 5. [x] - implement Particle struct
