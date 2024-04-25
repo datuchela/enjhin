@@ -3,11 +3,12 @@
 #include "raylib.h"
 #include "raymath.h"
 
-const float MAX_VELOCITY_VALUE = 250;
+const float SIMULATION_SPEED = 2.0;
+const float MAX_VELOCITY_VALUE = 5000;
 const float NODE_RADIUS = 5.0;
-const float DEFAULT_SPRING_STIFFNESS = 300.0;
-const float DEFAULT_SPRING_DAMPENING = 30.0;
-const float FRICTION = 0.005;
+const float DEFAULT_SPRING_STIFFNESS = 400.0;
+const float DEFAULT_SPRING_DAMPENING = 50.0;
+const float FRICTION = 0.0125;
 
 const int WINDOW_WIDTH = 1366;
 const int WINDOW_HEIGHT = 800;
@@ -20,9 +21,10 @@ typedef struct {
 
 DebugInfo* constants[] = {
     &((DebugInfo) { "FRICTION", FRICTION, "%.3f" }),
-    &((DebugInfo) { "SPRING_STIFFNESS", DEFAULT_SPRING_STIFFNESS, "%.1f" }),
-    &((DebugInfo) { "SPRING_DAMPENING", DEFAULT_SPRING_DAMPENING, "%.1f" }),
-    &((DebugInfo) { "MAX_VELOCITY", MAX_VELOCITY_VALUE, "%.1f" }),
+    &((DebugInfo) { "SPRING STIFFNESS", DEFAULT_SPRING_STIFFNESS, "%.1f" }),
+    &((DebugInfo) { "SPRING DAMPENING", DEFAULT_SPRING_DAMPENING, "%.1f" }),
+    &((DebugInfo) { "MAX VELOCITY", MAX_VELOCITY_VALUE, "%.1f" }),
+    &((DebugInfo) { "SIMULATION SPEED", SIMULATION_SPEED, "%.1f" }),
 };
 
 int constants_length = sizeof(constants) / sizeof(constants[0]);
@@ -138,7 +140,7 @@ int main(int _argc, char *_argv[])
     SoftBody soft_body1 = CreateSoftBody(particles, particles_length, springs, springs_length);
 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Enjhin");
-    SetTargetFPS(60);
+    SetTargetFPS(120);
     SetWindowMonitor(0);
 
     font = LoadFont("assets/fonts/mecha.png");
@@ -149,7 +151,6 @@ int main(int _argc, char *_argv[])
 
     double time_now = 0;
     double time_prev;
-    float simulation_speed = 1.0;
 
     Particle* nearest_particle;
     bool is_dragging = false;
@@ -158,7 +159,7 @@ int main(int _argc, char *_argv[])
     {
         time_prev = time_now;
         time_now = GetTime();
-        double dt = (time_now - time_prev) * simulation_speed;
+        double dt = (time_now - time_prev) * SIMULATION_SPEED;
 
         BeginDrawing();
         ClearBackground(BLACK);
