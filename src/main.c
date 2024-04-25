@@ -26,32 +26,49 @@ typedef struct {
     float rest_length;
 } Spring;
 
-void DEBUG_Draw_Particle_Stats(Particle* particles, int particles_length);
+typedef struct SoftBody{
+    Spring* springs;
+    Particle* particles;
+    int springs_length;
+    int particles_length;
+} SoftBody;
+
+void DEBUG_Draw_Stat(char *label, float value, const char *value_format, Vector2 position);
+void DEBUG_Draw_Stats(DebugInfo* debug_infos[], int debug_infos_length, Vector2 starting_position);
+void DEBUG_Draw_Particle_Stats(SoftBody *soft_body);
 
 Spring CreateSpring(Particle *particle1, Particle *particle2, float stiffness);
-void DrawSpring(Spring *spring);
 void UpdateSpring(Spring *spring);
+void DrawSpring(Spring *spring);
 void DampenSpring(Spring *spring, Vector2 tension_direction);
-void UpdateAllSprings(Spring* spring, int springs_length);
-void DrawAllSprings(Spring* spring, int springs_length);
+void UpdateAllSprings(Spring* springs, int springs_length);
+void DrawAllSprings(Spring* springs, int springs_length);
 
 Particle CreateParticle(Vector2 position, Vector2 velocity, Vector2 acceleration, Vector2 force, float mass);
+void UpdateParticle(Particle *particle, double dt);
 void DrawParticle(Particle *particle);
-void UpdateParticlePosition(Particle *particle, double dt);
-void UpdateParticleVelocity(Particle *particle, double dt);
-void ClampParticleVelocity(Particle *particles);
+
+void ResetParticleForces(Particle *particle);
 void UpdateParticleAcceleration(Particle *particle, double dt);
-void ResetParticleForces(Particle *particles);
+void UpdateParticleVelocity(Particle *particle, double dt);
+void ClampParticleVelocity(Particle *particle);
+void AddParticleFriction(Particle *particle);
+void UpdateParticlePosition(Particle *particle, double dt);
 
-void DrawAllParticles(Particle* particles, int particles_length);
-void UpdateAllParticlePositions(Particle* particles, int particles_length, double dt);
-void UpdateAllParticleVelocities(Particle* particles, int particles_length, double dt);
-void UpdateAllParticleAccelerations(Particle* particles, int particles_length, double dt);
-void ClampAllParticleVelocities(Particle* particles, int particles_length);
 void ResetAllParticleForces(Particle* particles, int particles_length);
+void UpdateAllParticleAccelerations(Particle* particles, int particles_length, double dt);
+void UpdateAllParticleVelocities(Particle* particles, int particles_length, double dt);
+void ClampAllParticleVelocities(Particle* particles, int particles_length);
+void UpdateAllParticlePositions(Particle* particles, int particles_length, double dt);
+void UpdateAllParticles(Particle* particles, int particles_length, double dt);
+void DrawAllParticles(Particle* particles, int particles_length);
 
-Particle* FindNearestParticleV(Vector2 position, Particle* particles, int particles_length);
+Particle* FindNearestParticleV(Vector2 position, SoftBody *soft_body);
 void DragParticleByMouse(Particle *particle, Vector2 mouse_position, bool *is_dragging);
+
+SoftBody CreateSoftBody(Particle* particles, int particles_length, Spring* springs, int springs_length);
+void UpdateSoftBody(SoftBody *soft_body, double dt);
+void DrawSoftBody(SoftBody *soft_body);
 
 int main(int _argc, char *_argv[]) 
 {
@@ -98,6 +115,11 @@ int main(int _argc, char *_argv[])
     springs[4] = CreateSpring(&particles[1], &particles[3], DEFAULT_SPRING_STIFFNESS);
     springs[5] = CreateSpring(&particles[2], &particles[3], DEFAULT_SPRING_STIFFNESS);
 
+    int particles_length = sizeof(particles) / sizeof(particles[0]);
+    int springs_length = sizeof(springs) / sizeof(springs[0]);
+
+    SoftBody soft_body1 = CreateSoftBody(particles, particles_length, springs, springs_length);
+
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Enjhin");
     SetTargetFPS(60);
     SetWindowMonitor(0);
@@ -106,15 +128,12 @@ int main(int _argc, char *_argv[])
     ClearBackground(BLACK);
     EndDrawing();
 
-    int particles_length = sizeof(particles) / sizeof(particles[0]);
-    int springs_length = sizeof(springs) / sizeof(springs[0]);
-
     double time_now = 0;
     double time_prev;
     float simulation_speed = 1.0;
 
-    bool is_dragging = false;
     Particle* nearest_particle;
+    bool is_dragging = false;
 
     while (!WindowShouldClose())
     {
@@ -122,12 +141,17 @@ int main(int _argc, char *_argv[])
         time_now = GetTime();
         double dt = (time_now - time_prev) * simulation_speed;
 
+        BeginDrawing();
+        ClearBackground(BLACK);
+
+        DrawFPS(10, 10);
+
         if(IsMouseButtonDown(0))
         {
             Vector2 mouse_position = GetMousePosition();
             if(is_dragging == false)
             {
-                nearest_particle = FindNearestParticleV(mouse_position, particles, particles_length);
+                nearest_particle = FindNearestParticleV(mouse_position, &soft_body1);
             }
             DragParticleByMouse(nearest_particle, mouse_position, &is_dragging);
         }
@@ -181,11 +205,6 @@ Spring CreateSpring(Particle *particle1, Particle *particle2, float stiffness)
     return spring;
 }
 
-void DrawSpring(Spring *spring)
-{
-    DrawLineEx(spring->particles[0]->position, spring->particles[1]->position, 3, RAYWHITE);
-}
-
 void UpdateSpring(Spring *spring)
 {
     Vector2 spring_vector = Vector2Subtract(spring->particles[0]->position, spring->particles[1]->position);
@@ -200,6 +219,11 @@ void UpdateSpring(Spring *spring)
     spring->particles[1]->force = Vector2Add(spring->particles[1]->force, Vector2Scale(tension1, spring->stiffness));
 
     DampenSpring(spring, tension_direction);
+}
+
+void DrawSpring(Spring *spring)
+{
+    DrawLineEx(spring->particles[0]->position, spring->particles[1]->position, 3, RAYWHITE);
 }
 
 void DampenSpring(Spring *spring, Vector2 tension_direction)
@@ -233,27 +257,21 @@ Particle CreateParticle(Vector2 position, Vector2 velocity, Vector2 acceleration
     return particle;
 }
 
+void UpdateParticle(Particle *particle, double dt)
+{
+    UpdateParticleAcceleration(particle, dt);
+    UpdateParticleVelocity(particle, dt);
+    UpdateParticlePosition(particle, dt);
+}
+
 void DrawParticle(Particle *particle)
 {
     DrawCircleV(particle->position, NODE_RADIUS, MAGENTA);
 }
 
-void UpdateParticlePosition(Particle *particle, double dt)
+void ResetParticleForces(Particle *particle)
 {
-    Vector2 position_displacement = Vector2Scale(particle->velocity, dt);
-    particle->position = Vector2Add(particle->position, position_displacement); 
-}
-
-void AddParticleFriction(Particle *particle)
-{
-    particle->velocity = Vector2Scale(particle->velocity, 1 - FRICTION);
-}
-
-void UpdateParticleVelocity(Particle *particle, double dt)
-{
-    Vector2 velocity_displacement = Vector2Scale(particle->acceleration, dt);
-    particle->velocity = Vector2Add(particle->velocity, velocity_displacement);
-    AddParticleFriction(particle);
+    particle->force = Vector2Zero();
 }
 
 void UpdateParticleAcceleration(Particle *particle, double dt)
@@ -261,14 +279,28 @@ void UpdateParticleAcceleration(Particle *particle, double dt)
     particle->acceleration = Vector2Scale(particle->force, 1/(particle->mass));
 }
 
+void UpdateParticleVelocity(Particle *particle, double dt)
+{
+    Vector2 velocity_displacement = Vector2Scale(particle->acceleration, dt);
+    particle->velocity = Vector2Add(particle->velocity, velocity_displacement);
+    ClampParticleVelocity(particle);
+    AddParticleFriction(particle);
+}
+
+void AddParticleFriction(Particle *particle)
+{
+    particle->velocity = Vector2Scale(particle->velocity, 1 - FRICTION);
+}
+
 void ClampParticleVelocity(Particle *particle)
 {
     particle->velocity = Vector2ClampValue(particle->velocity, -MAX_VELOCITY_VALUE, MAX_VELOCITY_VALUE);
 }
 
-void ResetParticleForces(Particle *particle)
+void UpdateParticlePosition(Particle *particle, double dt)
 {
-    particle->force = Vector2Zero();
+    Vector2 position_displacement = Vector2Scale(particle->velocity, dt);
+    particle->position = Vector2Add(particle->position, position_displacement);
 }
 
 void DrawAllParticles(Particle* particles, int particles_length)
@@ -279,33 +311,11 @@ void DrawAllParticles(Particle* particles, int particles_length)
     }
 }
 
-void UpdateAllParticlePositions(Particle* particles, int particles_length, double dt)
+void UpdateAllParticles(Particle* particles, int particles_length, double dt)
 {
     for(int i = 0; i < particles_length; i++)
     {
-        UpdateParticlePosition(&particles[i], dt);
-    }
-}
-void UpdateAllParticleVelocities(Particle* particles, int particles_length, double dt)
-{
-    for(int i = 0; i < particles_length; i++)
-    {
-        UpdateParticleVelocity(&particles[i], dt);
-    }
-}
-void UpdateAllParticleAccelerations(Particle* particles, int particles_length, double dt)
-{
-    for(int i = 0; i < particles_length; i++)
-    {
-        UpdateParticleAcceleration(&particles[i], dt);
-    }
-}
-
-void ClampAllParticleVelocities(Particle* particles, int particles_length)
-{
-    for(int i = 0; i < particles_length; i++)
-    {
-        ClampParticleVelocity(&particles[i]);
+        UpdateParticle(&particles[i], dt);
     }
 }
 
@@ -317,17 +327,49 @@ void ResetAllParticleForces(Particle* particles, int particles_length)
     }
 }
 
-Particle* FindNearestParticleV(Vector2 position, Particle* particles, int particles_length)
+void UpdateAllParticleAccelerations(Particle* particles, int particles_length, double dt)
+{
+    for(int i = 0; i < particles_length; i++)
+    {
+        UpdateParticleAcceleration(&particles[i], dt);
+    }
+}
+
+void UpdateAllParticleVelocities(Particle* particles, int particles_length, double dt)
+{
+    for(int i = 0; i < particles_length; i++)
+    {
+        UpdateParticleVelocity(&particles[i], dt);
+    }
+}
+
+void ClampAllParticleVelocities(Particle* particles, int particles_length)
+{
+    for(int i = 0; i < particles_length; i++)
+    {
+        ClampParticleVelocity(&particles[i]);
+    }
+}
+
+void UpdateAllParticlePositions(Particle* particles, int particles_length, double dt)
+{
+    for(int i = 0; i < particles_length; i++)
+    {
+        UpdateParticlePosition(&particles[i], dt);
+    }
+}
+
+Particle* FindNearestParticleV(Vector2 position, SoftBody *soft_body)
 {
     float closest_distance = FLT_MAX;
     Particle* nearest_particle;
-    for(int i = 0; i < particles_length; i++)
+    for(int i = 0; i < soft_body->particles_length; i++)
     {
-        float curr_distance = Vector2Distance(particles[i].position, position);
+        float curr_distance = Vector2Distance(soft_body->particles[i].position, position);
         if(curr_distance < closest_distance)
         {
             closest_distance = curr_distance;
-            nearest_particle = &particles[i];
+            nearest_particle = &soft_body->particles[i];
         }
     }
     return nearest_particle;
@@ -339,4 +381,31 @@ void DragParticleByMouse(Particle *particle, Vector2 mouse_position, bool *is_dr
     particle->acceleration = Vector2Zero();
     particle->velocity = Vector2Zero();
     particle->position = mouse_position;
+}
+
+SoftBody CreateSoftBody(Particle* particles, int particles_length, Spring* springs, int springs_length)
+{
+    SoftBody soft_body;
+    soft_body.particles = particles;
+    soft_body.springs = springs;
+    soft_body.particles_length = particles_length;
+    soft_body.springs_length = springs_length;
+    return soft_body;
+}
+
+void UpdateSoftBody(SoftBody *soft_body, double dt)
+{
+    ResetAllParticleForces(soft_body->particles, soft_body->particles_length);
+    UpdateAllSprings(soft_body->springs, soft_body->springs_length);
+    UpdateAllParticles(soft_body->particles, soft_body->particles_length, dt);
+}
+
+void DrawSoftBody(SoftBody *soft_body)
+{
+    for(int i = 0; i < soft_body->springs_length; i++)
+    {
+        DrawSpring(&soft_body->springs[i]);
+        DrawParticle(soft_body->springs[i].particles[0]);
+        DrawParticle(soft_body->springs[i].particles[1]);
+    }
 }
