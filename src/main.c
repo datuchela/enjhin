@@ -5,8 +5,8 @@
 
 const float MAX_VELOCITY_VALUE = 250;
 const float NODE_RADIUS = 5.0;
-const float DEFAULT_SPRING_STIFFNESS = 200.0;
-const float DEFAULT_SPRING_DAMPENING = 70.0;
+const float DEFAULT_SPRING_STIFFNESS = 300.0;
+const float DEFAULT_SPRING_DAMPENING = 90.0;
 const float FRICTION = 0.005;
 
 const int WINDOW_WIDTH = 1000;
@@ -93,7 +93,7 @@ int main(int _argc, char *_argv[])
 
     particles[0] = CreateParticle
         (
-            (Vector2) {100.0, 100.0},
+            (Vector2) {150.0, 150.0},
             (Vector2) {0, 0},
             (Vector2) {0, 0},
             (Vector2) {0, 0},
@@ -101,7 +101,7 @@ int main(int _argc, char *_argv[])
         );
     particles[1] = CreateParticle
         (
-            (Vector2) {150.0, 100.0},
+            (Vector2) {200.0, 150.0},
             (Vector2) {0, 0},
             (Vector2) {0, 0},
             (Vector2) {0, 0},
@@ -109,7 +109,7 @@ int main(int _argc, char *_argv[])
         );
     particles[2] = CreateParticle
         (
-            (Vector2) {150.0, 150.0},
+            (Vector2) {200.0, 200.0},
             (Vector2) {0, 0},
             (Vector2) {0, 0},
             (Vector2) {0, 0},
@@ -117,7 +117,7 @@ int main(int _argc, char *_argv[])
         );
     particles[3] = CreateParticle
         (
-            (Vector2) {100.0, 150.0},
+            (Vector2) {150.0, 200.0},
             (Vector2) {0, 0},
             (Vector2) {0, 0},
             (Vector2) {0, 0},
