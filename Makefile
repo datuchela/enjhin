@@ -2,7 +2,7 @@ build:
 	./build.sh
 
 win:
-	./build-win.sh
+	./build-win64.sh
 
 debug: 
 	./build.sh && ./dist/game
