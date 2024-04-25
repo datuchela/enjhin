@@ -6,7 +6,7 @@
 const float MAX_VELOCITY_VALUE = 250;
 const float NODE_RADIUS = 5.0;
 const float DEFAULT_SPRING_STIFFNESS = 300.0;
-const float DEFAULT_SPRING_DAMPENING = 90.0;
+const float DEFAULT_SPRING_DAMPENING = 30.0;
 const float FRICTION = 0.005;
 
 const int WINDOW_WIDTH = 1366;
