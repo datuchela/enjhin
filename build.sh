@@ -15,7 +15,7 @@ fi
 
 gcc $SOURCE_FILE_PATH \
     -o $OUTPUT_FILE_PATH \
-    -I. -L./lib -lraylib -lm -ldl -lpthread && \
+    -I. -L./lib -lraylib -lm -lpthread && \
 
     echo "✅ Build finished successfully!
 Output path: $OUTPUT_FILE_PATH" || \
