@@ -9,7 +9,7 @@ const float DEFAULT_SPRING_STIFFNESS = 300.0;
 const float DEFAULT_SPRING_DAMPENING = 90.0;
 const float FRICTION = 0.005;
 
-const int WINDOW_WIDTH = 1000;
+const int WINDOW_WIDTH = 1366;
 const int WINDOW_HEIGHT = 800;
 Font font;
 
