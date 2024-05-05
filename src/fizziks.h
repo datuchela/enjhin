@@ -1,9 +1,9 @@
+#ifndef FIZZIKS_H
+#define FIZZIKS_H
+
 #include <float.h>
 #include "raylib.h"
 #include "raymath.h"
-
-#ifndef FIZZIKS_H
-#define FIZZIKS_H
 
 extern const Color NODE_COLOR;
 extern const float SIMULATION_SPEED;

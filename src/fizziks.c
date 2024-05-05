@@ -1,5 +1,4 @@
 #include "fizziks.h"
-#include <raymath.h>
 
 void AttachMouseControls(SoftBody *soft_body, bool is_dragging)
 {
