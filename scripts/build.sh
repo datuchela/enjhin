@@ -3,9 +3,9 @@
 SOURCE_FILE_PATH="./src/fizziks.c ./src/main.c"
 OUTPUT_FILE_DIR=.
 OUTPUT_FILE_NAME=game
-OUTPUT_FILE_PATH=$OUTPUT_FILE_DIR/$OUTPUT_FILE_NAME
-BUILD_FLAGS="-I./raylib-5.0 -L./raylib-5.0 -lraylib -lm -lpthread"
+
 COMPILER_BIN="gcc"
+BUILD_FLAGS="-I./raylib-5.0 -L./raylib-5.0 -lraylib -lm -lpthread"
 
 echo "---------------------------------"
 if [ "$1" == "win64" ]; then
@@ -31,4 +31,5 @@ $COMPILER_BIN $SOURCE_FILE_PATH \
     echo "✅ Build finished successfully!
 Output path: $OUTPUT_FILE_DIR/$OUTPUT_FILE_NAME" || \
     echo "❌ Something went wrong with the build"
+
 echo "---------------------------------"
