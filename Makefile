@@ -2,13 +2,13 @@ build:
 	./scripts/build.sh
 
 win:
-	./scripts/build-win64.sh
+	./scripts/build.sh win64
 
 release:
 	./scripts/build.sh && ./scripts/release.sh
 
 release-win:
-	./scripts/build-win64.sh && ./scripts/release.sh win64
+	./scripts/build.sh win64 && ./scripts/release.sh win64
 
 debug: 
 	./scripts/build.sh && ./game
