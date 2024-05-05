@@ -1,4 +1,7 @@
+*.zip
+game
+game.exe
+/releases
 /dist
-/lib/raylib/src/*.a
-/lib/raylib/src/*.o
+/bin
 windowsEOL

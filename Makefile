@@ -1,14 +1,20 @@
 build: 
-	./build.sh
+	./scripts/build.sh
 
 win:
-	./build-win64.sh
+	./scripts/build-win64.sh
+
+release:
+	./scripts/build.sh && ./scripts/release.sh
+
+release-win:
+	./scripts/build-win64.sh && ./scripts/release.sh win64
 
 debug: 
-	./build.sh && ./dist/game
+	./scripts/build.sh && ./game
 
 run:
-	./dist/game
+	./game
 
 raylib:
 	cd ./raylib-5.0/src && \

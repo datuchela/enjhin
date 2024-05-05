@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SOURCE_FILE_PATH="./src/fizziks.c ./src/main.c"
-OUTPUT_FILE_DIR=./dist
+OUTPUT_FILE_DIR=.
 OUTPUT_FILE_NAME=game
 OUTPUT_FILE_PATH=$OUTPUT_FILE_DIR/$OUTPUT_FILE_NAME
 
