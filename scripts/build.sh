@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SOURCE_FILE_PATH="./src/fizziks.c ./src/main.c"
+SOURCE_FILE_PATH="./src/debug.c ./src/fizziks.c ./src/main.c"
 OUTPUT_FILE_DIR=.
 OUTPUT_FILE_NAME=game
 
