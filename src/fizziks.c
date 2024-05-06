@@ -1,5 +1,20 @@
 #include "fizziks.h"
 
+int Vector2EqualsY(Vector2 p, Vector2 q)
+{
+    #if !defined(EPSILON)
+    #define EPSILON 0.000001f
+    #endif
+
+    int result = ((fabsf(p.y - q.y)) <= (EPSILON*fmaxf(1.0f, fmaxf(fabsf(p.y), fabsf(q.y)))));
+    return result;
+}
+
+float Vector2CrossProduct(Vector2 vector1, Vector2 vector2)
+{
+    return vector1.x * vector2.y - vector1.y * vector2.x;
+}
+
 void AttachMouseControls(SoftBody *soft_body, bool is_dragging)
 {
     if(IsMouseButtonDown(0))
@@ -69,12 +84,7 @@ void UpdateSoftBodyBoundingRect(SoftBody *soft_body)
     soft_body->bounding_rect.bottom_left = (Vector2){left, bottom};
 }
 
-float Vector2CrossProduct(Vector2 vector1, Vector2 vector2)
-{
-    return vector1.x * vector2.y - vector1.y * vector2.x;
-}
-
-int GetSegmentIntersectionAmount(Segment segment1, Segment segment2)
+int AreSegmentsIntersecting(Segment segment1, Segment segment2)
 {
     Vector2 A = segment1.start;
     Vector2 B = segment1.end;
@@ -97,18 +107,11 @@ int GetSegmentIntersectionAmount(Segment segment1, Segment segment2)
     bool is_on_segment_up_left = C.x >= M.x && M.x >= D.x && C.y >= M.y && M.y >= D.y;
     bool is_on_segment_up_right = C.x <= M.x && M.x <= D.x && C.y >= M.y && M.y >= D.y;
 
-    if(
-        is_inside_segment &
-        (is_on_segment_down_right |
-        is_on_segment_down_left |
-        is_on_segment_up_left |
-        is_on_segment_up_right)
-    )
-    {
-        return 1;
-    }
-
-    return 0;
+    return is_inside_segment &&
+    (is_on_segment_down_right ||
+    is_on_segment_down_left ||
+    is_on_segment_up_left ||
+    is_on_segment_up_right);
 }
 
 int GetPointToBodyIntersections(Vector2 *point, SoftBody *soft_body)
@@ -124,7 +127,8 @@ int GetPointToBodyIntersections(Vector2 *point, SoftBody *soft_body)
     GetSoftBodySides(soft_body, sides);
     for(int i = 0; i < sides_length; i++)
     {
-        intersections += GetSegmentIntersectionAmount(horizontal_segment, sides[i]);
+        intersections += (Vector2EqualsY(*point, soft_body->particles[i].position)) ? 1 : 0;
+        intersections += AreSegmentsIntersecting(horizontal_segment, sides[i]);
     }
     return intersections;
 }
@@ -220,11 +224,12 @@ void UpdateParticle(Particle *particle, double dt)
 
 void DrawParticle(Particle *particle)
 {
+    Color draw_color = NODE_COLOR;
     if(particle->is_colliding == true)
     {
-        return DrawCircleV(particle->position, NODE_RADIUS, RED);
+        draw_color = RED;
     }
-    DrawCircleV(particle->position, NODE_RADIUS, NODE_COLOR);
+    DrawCircleV(particle->position, NODE_RADIUS, draw_color);
 }
 
 void ResetParticleForces(Particle *particle)
