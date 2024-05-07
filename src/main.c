@@ -74,7 +74,14 @@ int main(int _argc, char *_argv[])
         DrawSoftBody(&soft_bodies[0]);
         DrawSoftBody(&soft_bodies[1]);
 
+        DebugInfo* variables[] = {
+            &((DebugInfo) { "dt", dt, "%.3f" }),
+            &((DebugInfo) { "is_dragging", mouse_state.is_dragging, "%.1f" }),
+        };
+        int variables_length = sizeof(variables) / sizeof(variables[0]);
+
         DEBUG_Draw_Stats(constants, constants_length, (Vector2){10, 30});
+        DEBUG_Draw_Stats(variables, variables_length, (Vector2){10, 132});
         DEBUG_Draw_Particle_Stats(&soft_bodies[0], (Vector2){WINDOW_WIDTH - 250, 10});
         DEBUG_Draw_Particle_Stats(&soft_bodies[1], (Vector2){WINDOW_WIDTH - 250, 280});
 
