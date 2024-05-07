@@ -37,6 +37,8 @@ typedef struct Particle {
     Vector2 force;
     float mass;
     bool is_colliding;
+
+    int debug_id;
 } Particle;
 
 typedef struct Spring {
@@ -53,6 +55,14 @@ typedef struct SoftBody {
     BoundingRect bounding_rect;
 } SoftBody;
 
+//Math Functions
+//Proper Arithmetic Comparators
+bool LessOrEquals(float a, float b);
+bool GreaterOrEquals(float a, float b);
+
+float Vector2CrossProduct(Vector2 vector1, Vector2 vector2);
+
+//Main Physics Functions
 Spring CreateSpring(Particle *particle1, Particle *particle2, float stiffness);
 void UpdateSpring(Spring *spring);
 void DrawSpring(Spring *spring);
@@ -93,7 +103,6 @@ int GetPointToBodyIntersections(Vector2 *point, SoftBody *soft_body);
 bool IsParticleIntersectingSoftBody(Particle *particle, SoftBody *soft_body);
 void HandleCollisionSoftBodies(SoftBody *soft_body1, SoftBody *soft_body2);
 void ResetSoftBodyCollisions(SoftBody *soft_body);
-float Vector2CrossProduct(Vector2 vector1, Vector2 vector2);
 int GetSegmentIntersectionAmount(Segment segment1, Segment segment2);
 
 //Methods To Create Simple Shapes
