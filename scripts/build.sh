@@ -6,7 +6,6 @@ OUTPUT_FILE_NAME=game
 
 COMPILER_BIN="gcc"
 BUILD_FLAGS="-Wall -I./raylib-5.0 -L./raylib-5.0 -lraylib -lm -lpthread"
-BUILD_CMD="$COMPILER_BIN $SOURCE_FILE_PATH -o $OUTPUT_FILE_DIR/$OUTPUT_FILE_NAME $BUILD_FLAGS"
 
 OS_FROM="Linux"
 OS_FOR="Linux"
@@ -32,7 +31,7 @@ while getopts 'f:t:g' FLAG; do
                 w|windows)
                     OS_FOR="Windows"
                     OUTPUT_FILE_NAME=game.exe
-                    BUILD_FLAGS="-I./raylib-5.0_win64_mingw-w64/include -L./raylib-5.0_win64_mingw-w64/lib -lraylib -lm -lpthread -lgdi32 -lwinmm"
+                    BUILD_FLAGS="-Wall -I./raylib-5.0_win64_mingw-w64/include -L./raylib-5.0_win64_mingw-w64/lib -lraylib -lm -lpthread -lgdi32 -lwinmm"
                     if [ "$OS_FROM" == "Linux" ]; then
                         COMPILER_BIN="x86_64-w64-mingw32-gcc"
                     fi
@@ -40,7 +39,7 @@ while getopts 'f:t:g' FLAG; do
             esac
             ;;
         g)
-            BUILD_CMD="$BUILD_CMD -g"
+            BUILD_FLAGS="-g3 $BUILD_FLAGS"
             ;;
     esac
 done
@@ -48,6 +47,8 @@ done
 if !(test -d $OUTPUT_FILE_DIR); then
     mkdir $OUTPUT_FILE_DIR
 fi
+
+BUILD_CMD="$COMPILER_BIN $SOURCE_FILE_PATH -o $OUTPUT_FILE_DIR/$OUTPUT_FILE_NAME $BUILD_FLAGS"
 
 echo "---------------------------------"
 
