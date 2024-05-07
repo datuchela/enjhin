@@ -96,4 +96,7 @@ void ResetSoftBodyCollisions(SoftBody *soft_body);
 float Vector2CrossProduct(Vector2 vector1, Vector2 vector2);
 int GetSegmentIntersectionAmount(Segment segment1, Segment segment2);
 
+//Methods To Create Simple Shapes
+SoftBody CreateSquare(Particle *particles, Spring *springs, float init_x, float init_y, float width, float part_mass, float stiffness, int num_diagonals, bool flag_right_diagonal);
+
 #endif /* FIZZIKS_H */

@@ -65,6 +65,8 @@ int main(int _argc, char *_argv[])
 
     soft_bodies[0] = CreateSoftBody(particles1, particles1_length, springs1, springs1_length);
     soft_bodies[1] = CreateSoftBody(particles2, particles2_length, springs2, springs2_length);
+    Particle sq_particles[4]; Spring sq_springs[6];
+    SoftBody simple_square = CreateSquare(sq_particles, sq_springs, 450, 250, 50, 10, DEFAULT_SPRING_STIFFNESS, 2, false);
 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Enjhin");
     SetTargetFPS(120);
@@ -96,6 +98,7 @@ int main(int _argc, char *_argv[])
 
         UpdateSoftBody(&soft_bodies[0], dt);
         UpdateSoftBody(&soft_bodies[1], dt);
+        UpdateSoftBody(&simple_square, dt);
 
         BeginDrawing();
         ClearBackground(BLACK);
@@ -103,6 +106,7 @@ int main(int _argc, char *_argv[])
         DrawFPS(10, 10);
         DrawSoftBody(&soft_bodies[0]);
         DrawSoftBody(&soft_bodies[1]);
+        DrawSoftBody(&simple_square);
 
         DEBUG_Draw_Stats(constants, constants_length, (Vector2){10, 30});
         DEBUG_Draw_Particle_Stats(&soft_bodies[0], (Vector2){WINDOW_WIDTH - 250, 10});

@@ -371,3 +371,48 @@ void DrawSoftBody(SoftBody *soft_body)
         DrawParticle(soft_body->springs[i].particles[1]);
     }
 }
+
+
+//Methods for Simple Shapes
+SoftBody CreateSquare(Particle *particles, Spring *springs, float init_x, float init_y, float width, float part_mass, float stiffness, int num_diagonals, bool flag_right_diagonal) {
+    assert (num_diagonals < 3);
+
+    int num_vertices = 4;
+
+    particles[0] = CreateParticle((Vector2) {init_x, init_y}, part_mass);
+    particles[1] = CreateParticle((Vector2) {init_x + width, init_y}, part_mass);
+    particles[2] = CreateParticle((Vector2) {init_x + width, init_y + width}, part_mass);
+    particles[3] = CreateParticle((Vector2) {init_x, init_y + width}, part_mass);
+
+    springs[0] = CreateSpring(&particles[0], &particles[1], stiffness);
+    springs[1] = CreateSpring(&particles[1], &particles[2], stiffness);
+    springs[2] = CreateSpring(&particles[2], &particles[3], stiffness);
+    springs[3] = CreateSpring(&particles[0], &particles[3], stiffness);
+    
+    int order_for_diagonals[4];
+    if(flag_right_diagonal) {
+        order_for_diagonals[0] = 1;
+        order_for_diagonals[1] = 3;
+        order_for_diagonals[2] = 0;
+        order_for_diagonals[3] = 2;
+    }
+    else {
+        order_for_diagonals[0] = 0;
+        order_for_diagonals[1] = 2;
+        order_for_diagonals[2] = 1;
+        order_for_diagonals[3] = 3;
+    } 
+    if(num_diagonals > 0)
+        springs[4] = CreateSpring(&particles[order_for_diagonals[0]], &particles[order_for_diagonals[1]], stiffness);
+    if(num_diagonals == 2)
+        springs[5] = CreateSpring(&particles[order_for_diagonals[2]], &particles[order_for_diagonals[3]], stiffness);
+
+    return CreateSoftBody(particles, num_vertices, springs, num_vertices + num_diagonals);
+}
+
+//For debugging only
+Particle CreateParticleDEBUG(Vector2 position, float mass, int id)
+{
+    Particle particle = {position, Vector2Zero(), Vector2Zero(), Vector2Zero(), mass, false, id};
+    return particle;
+}
