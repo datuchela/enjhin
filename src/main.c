@@ -28,45 +28,13 @@ int main(int _argc, char *_argv[])
 {
     SoftBody soft_bodies[2] = {};
 
-    Particle particles1[4] = {
-        CreateParticle((Vector2) {250.0, 250.0}, 10.0),
-        CreateParticle((Vector2) {300.0, 250.0}, 10.0),
-        CreateParticle((Vector2) {300.0, 300.0}, 10.0),
-        CreateParticle((Vector2) {250.0, 300.0}, 10.0),
-    };
-    Particle particles2[4] = {
-        CreateParticle((Vector2) {350.0, 350.0}, 10.0),
-        CreateParticle((Vector2) {450.0, 350.0}, 10.0),
-        CreateParticle((Vector2) {450.0, 450.0}, 10.0),
-        CreateParticle((Vector2) {350.0, 450.0}, 10.0),
-    };
-    Spring springs1[6] = {
-        CreateSpring(&particles1[0], &particles1[1], DEFAULT_SPRING_STIFFNESS),
-        CreateSpring(&particles1[0], &particles1[2], DEFAULT_SPRING_STIFFNESS),
-        CreateSpring(&particles1[0], &particles1[3], DEFAULT_SPRING_STIFFNESS),
-        CreateSpring(&particles1[1], &particles1[2], DEFAULT_SPRING_STIFFNESS),
-        CreateSpring(&particles1[1], &particles1[3], DEFAULT_SPRING_STIFFNESS),
-        CreateSpring(&particles1[2], &particles1[3], DEFAULT_SPRING_STIFFNESS),
-    };
-    Spring springs2[6] = {
-        CreateSpring(&particles2[0], &particles2[1], DEFAULT_SPRING_STIFFNESS),
-        CreateSpring(&particles2[0], &particles2[2], DEFAULT_SPRING_STIFFNESS),
-        CreateSpring(&particles2[0], &particles2[3], DEFAULT_SPRING_STIFFNESS),
-        CreateSpring(&particles2[1], &particles2[2], DEFAULT_SPRING_STIFFNESS),
-        CreateSpring(&particles2[1], &particles2[3], DEFAULT_SPRING_STIFFNESS),
-        CreateSpring(&particles2[2], &particles2[3], DEFAULT_SPRING_STIFFNESS),
-    };
+    Particle particles1[4];
+    Particle particles2[4];
+    Spring springs1[6];
+    Spring springs2[6];
 
-    int particles1_length = sizeof(particles1) / sizeof(particles1[0]);
-    int springs1_length = sizeof(springs1) / sizeof(springs1[0]);
-
-    int particles2_length = sizeof(particles2) / sizeof(particles2[0]);
-    int springs2_length = sizeof(springs2) / sizeof(springs2[0]);
-
-    soft_bodies[0] = CreateSoftBody(particles1, particles1_length, springs1, springs1_length);
-    soft_bodies[1] = CreateSoftBody(particles2, particles2_length, springs2, springs2_length);
-    Particle sq_particles[4]; Spring sq_springs[6];
-    SoftBody simple_square = CreateSquare(sq_particles, sq_springs, 450, 250, 50, 10, DEFAULT_SPRING_STIFFNESS, 2, false);
+    soft_bodies[0] = CreateSquare(particles1, springs1, 250, 250, 50, 10, DEFAULT_SPRING_STIFFNESS, 2, false);
+    soft_bodies[1] = CreateSquare(particles2, springs2, 350, 350, 100, 10, DEFAULT_SPRING_STIFFNESS, 2, true);
 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Enjhin");
     SetTargetFPS(120);
@@ -98,7 +66,6 @@ int main(int _argc, char *_argv[])
 
         UpdateSoftBody(&soft_bodies[0], dt);
         UpdateSoftBody(&soft_bodies[1], dt);
-        UpdateSoftBody(&simple_square, dt);
 
         BeginDrawing();
         ClearBackground(BLACK);
@@ -106,7 +73,6 @@ int main(int _argc, char *_argv[])
         DrawFPS(10, 10);
         DrawSoftBody(&soft_bodies[0]);
         DrawSoftBody(&soft_bodies[1]);
-        DrawSoftBody(&simple_square);
 
         DEBUG_Draw_Stats(constants, constants_length, (Vector2){10, 30});
         DEBUG_Draw_Particle_Stats(&soft_bodies[0], (Vector2){WINDOW_WIDTH - 250, 10});
