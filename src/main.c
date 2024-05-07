@@ -49,7 +49,7 @@ int main(int _argc, char *_argv[])
     double time_now = 0;
     double time_prev;
 
-    bool is_dragging = false;
+    MouseState mouse_state;
 
     while (!WindowShouldClose())
     {
@@ -57,7 +57,7 @@ int main(int _argc, char *_argv[])
         time_now = GetTime();
         double dt = (time_now - time_prev) * SIMULATION_SPEED;
 
-        AttachMouseControls(&soft_bodies[0], is_dragging);
+        AttachMouseControls(soft_bodies, 2, &mouse_state);
 
         ResetSoftBodyCollisions(&soft_bodies[0]);
         ResetSoftBodyCollisions(&soft_bodies[1]);

@@ -1,7 +1,6 @@
 #include "fizziks.h"
 #include <assert.h>
 
-
 bool LessOrEquals(float a, float b) 
 {
     return a < b || FloatEquals(a, b);
@@ -17,20 +16,31 @@ float Vector2CrossProduct(Vector2 vector1, Vector2 vector2)
     return vector1.x * vector2.y - vector1.y * vector2.x;
 }
 
-void AttachMouseControls(SoftBody *soft_body, bool is_dragging)
+void AttachMouseControls(SoftBody *soft_bodies, int soft_bodies_length, MouseState *mouse_state)
 {
-    if(IsMouseButtonDown(0))
+    if(IsMouseButtonDown(0)) 
     {
-        Particle *nearest_particle;
         Vector2 mouse_position = GetMousePosition();
-        if(is_dragging == false)
+        if(!mouse_state->is_dragging)
         {
-            nearest_particle = FindNearestParticleV(mouse_position, soft_body);
-            is_dragging = true;
+            float closest_distance = FLT_MAX;
+            float curr_distance;
+            Particle *curr_particle;
+            for(int i = 0; i < soft_bodies_length; i++)
+            {
+                curr_particle = FindNearestParticleV(mouse_position, &soft_bodies[i]);
+                curr_distance = Vector2Distance(curr_particle->position, mouse_position);
+                if(curr_distance < closest_distance)
+                {
+                    mouse_state->particle = curr_particle;
+                    closest_distance = curr_distance;
+                }
+            }
         }
-        DragParticleByMouse(nearest_particle, mouse_position);
+        DragParticleByMouse(mouse_state->particle, mouse_position);
+        mouse_state->is_dragging = true;
     } else {
-        is_dragging = false;
+        mouse_state->is_dragging = false; 
     }
 }
 

@@ -55,6 +55,11 @@ typedef struct SoftBody {
     BoundingRect bounding_rect;
 } SoftBody;
 
+typedef struct MouseState {
+    bool is_dragging;
+    Particle *particle;
+} MouseState;
+
 //Math Functions
 //Proper Arithmetic Comparators
 bool LessOrEquals(float a, float b);
@@ -91,7 +96,7 @@ void DrawAllParticles(Particle* particles, int particles_length);
 
 void DragParticleByMouse(Particle *particle, Vector2 mouse_position);
 Particle* FindNearestParticleV(Vector2 position, SoftBody *soft_body);
-void AttachMouseControls(SoftBody *soft_body, bool is_dragging);
+void AttachMouseControls(SoftBody *soft_bodies, int soft_bodies_length, MouseState *mouse_state);
 
 SoftBody CreateSoftBody(Particle* particles, int particles_length, Spring* springs, int springs_length);
 void UpdateSoftBody(SoftBody *soft_body, double dt);
