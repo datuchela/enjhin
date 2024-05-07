@@ -120,16 +120,16 @@ int AreSegmentsIntersecting(Segment segment1, Segment segment2)
     // bool is_on_segment_up_right = C.x <= M.x && M.x <= D.x && C.y >= M.y && M.y >= D.y;
 
     bool is_on_segment_down_right = LessOrEquals(C.x, M.x) && LessOrEquals(M.x, D.x)
-                                    && LessOrEquals(C.y, M.y) && LessOrEquals(M.y, D.y);
+        && LessOrEquals(C.y, M.y) && LessOrEquals(M.y, D.y);
 
     bool is_on_segment_down_left = GreaterOrEquals(C.x, M.x) && GreaterOrEquals(M.x, D.x)
-                                    && LessOrEquals(C.y, M.y) && LessOrEquals(M.y, D.y);
-    
+        && LessOrEquals(C.y, M.y) && LessOrEquals(M.y, D.y);
+
     bool is_on_segment_up_left = GreaterOrEquals(C.x, M.x) && GreaterOrEquals(M.x, D.x)
-                                    && GreaterOrEquals(C.y, M.y) && GreaterOrEquals(M.y, D.y);
-    
+        && GreaterOrEquals(C.y, M.y) && GreaterOrEquals(M.y, D.y);
+
     bool is_on_segment_up_right = LessOrEquals(C.x, M.x) && LessOrEquals(M.x, D.x)
-                                    && GreaterOrEquals(C.y, M.y) && GreaterOrEquals(M.y, D.y);
+        && GreaterOrEquals(C.y, M.y) && GreaterOrEquals(M.y, D.y);
 
     return is_inside_segment &&
     (is_on_segment_down_right ||
@@ -195,7 +195,7 @@ void UpdateSpring(Spring *spring)
 
     Vector2 tension0 = Vector2Scale(tension_direction, -delta_length);
     Vector2 tension1 = Vector2Scale(tension_direction, delta_length);
-    
+
     spring->particles[0]->force = Vector2Add(spring->particles[0]->force, Vector2Scale(tension0, spring->stiffness));
     spring->particles[1]->force = Vector2Add(spring->particles[1]->force, Vector2Scale(tension1, spring->stiffness));
 
@@ -411,7 +411,7 @@ SoftBody CreateSquare(Particle *particles, Spring *springs, float init_x, float 
     springs[1] = CreateSpring(&particles[1], &particles[2], stiffness);
     springs[2] = CreateSpring(&particles[2], &particles[3], stiffness);
     springs[3] = CreateSpring(&particles[0], &particles[3], stiffness);
-    
+
     int order_for_diagonals[4];
     if(flag_right_diagonal) {
         order_for_diagonals[0] = 1;
