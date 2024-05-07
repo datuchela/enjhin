@@ -1,20 +1,29 @@
 build: 
-	./scripts/build.sh
+	./scripts/build.sh -f linux -t linux
+
+linux-win:
+	./scripts/build.sh -f linux -t windows
 
 win:
-	./scripts/build.sh win64
+	./scripts/build.sh -f windows -t windows
 
-release:
-	./scripts/build.sh && ./scripts/release.sh
+release: build
+	./scripts/release.sh
 
-release-win:
-	./scripts/build.sh win64 && ./scripts/release.sh win64
+release-linux-win: linux-win
+	./scripts/release.sh -w
 
-debug: 
-	./scripts/build.sh && ./game
+debug: build
+	gdb ./game
+
+debug-win: win
+	gdb ./game.exe
 
 run:
 	./game
+
+run-win:
+	./game.exe
 
 raylib:
 	cd ./raylib-5.0/src && \

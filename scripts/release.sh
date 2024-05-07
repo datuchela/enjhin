@@ -4,10 +4,14 @@ RELEASE_NAME="enjhin-$(date +%F)"
 BINARY_PATH="./game"
 RELEASES_FOLDER_PATH="./releases"
 
-if [ "$1" == "win64" ]; then
-    RELEASE_NAME="$RELEASE_NAME"_win64
-    BINARY_PATH="./game.exe"
-fi
+while getopts 'w' FLAG; do
+    case "$FLAG" in
+        w)
+            RELEASE_NAME="$RELEASE_NAME"_win64
+            BINARY_PATH="./game.exe"
+            ;;
+    esac
+done
 
 echo "RELEASE_NAME: $RELEASE_NAME"
 echo "BINARY_PATH: $BINARY_PATH"
