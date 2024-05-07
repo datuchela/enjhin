@@ -1,13 +1,15 @@
 #include "fizziks.h"
+#include <assert.h>
 
-int Vector2EqualsY(Vector2 p, Vector2 q)
+
+bool LessOrEquals(float a, float b) 
 {
-    #if !defined(EPSILON)
-    #define EPSILON 0.000001f
-    #endif
+    return a < b || FloatEquals(a, b);
+}
 
-    int result = ((fabsf(p.y - q.y)) <= (EPSILON*fmaxf(1.0f, fmaxf(fabsf(p.y), fabsf(q.y)))));
-    return result;
+bool GreaterOrEquals(float a, float b) 
+{
+    return a > b || FloatEquals(a, b);
 }
 
 float Vector2CrossProduct(Vector2 vector1, Vector2 vector2)
@@ -102,10 +104,22 @@ int AreSegmentsIntersecting(Segment segment1, Segment segment2)
 
     bool is_inside_segment = 0 < t && t < 1;
 
-    bool is_on_segment_down_right = C.x <= M.x && M.x <= D.x && C.y <= M.y && M.y <= D.y;
-    bool is_on_segment_down_left = C.x >= M.x && M.x >= D.x && C.y <= M.y && M.y <= D.y;
-    bool is_on_segment_up_left = C.x >= M.x && M.x >= D.x && C.y >= M.y && M.y >= D.y;
-    bool is_on_segment_up_right = C.x <= M.x && M.x <= D.x && C.y >= M.y && M.y >= D.y;
+    // bool is_on_segment_down_right = C.x <= M.x && M.x <= D.x && C.y <= M.y && M.y <= D.y;
+    // bool is_on_segment_down_left = C.x >= M.x && M.x >= D.x && C.y <= M.y && M.y <= D.y;
+    // bool is_on_segment_up_left = C.x >= M.x && M.x >= D.x && C.y >= M.y && M.y >= D.y;
+    // bool is_on_segment_up_right = C.x <= M.x && M.x <= D.x && C.y >= M.y && M.y >= D.y;
+
+    bool is_on_segment_down_right = LessOrEquals(C.x, M.x) && LessOrEquals(M.x, D.x)
+                                    && LessOrEquals(C.y, M.y) && LessOrEquals(M.y, D.y);
+
+    bool is_on_segment_down_left = GreaterOrEquals(C.x, M.x) && GreaterOrEquals(M.x, D.x)
+                                    && LessOrEquals(C.y, M.y) && LessOrEquals(M.y, D.y);
+    
+    bool is_on_segment_up_left = GreaterOrEquals(C.x, M.x) && GreaterOrEquals(M.x, D.x)
+                                    && GreaterOrEquals(C.y, M.y) && GreaterOrEquals(M.y, D.y);
+    
+    bool is_on_segment_up_right = LessOrEquals(C.x, M.x) && LessOrEquals(M.x, D.x)
+                                    && GreaterOrEquals(C.y, M.y) && GreaterOrEquals(M.y, D.y);
 
     return is_inside_segment &&
     (is_on_segment_down_right ||
@@ -123,11 +137,10 @@ int GetPointToBodyIntersections(Vector2 *point, SoftBody *soft_body)
     Segment horizontal_segment = {*point, right_point};
 
     int sides_length = soft_body->particles_length;
-    Segment sides[sides_length] = {};
+    Segment sides[sides_length];
     GetSoftBodySides(soft_body, sides);
     for(int i = 0; i < sides_length; i++)
     {
-        intersections += (Vector2EqualsY(*point, soft_body->particles[i].position)) ? 1 : 0;
         intersections += AreSegmentsIntersecting(horizontal_segment, sides[i]);
     }
     return intersections;
@@ -408,11 +421,4 @@ SoftBody CreateSquare(Particle *particles, Spring *springs, float init_x, float 
         springs[5] = CreateSpring(&particles[order_for_diagonals[2]], &particles[order_for_diagonals[3]], stiffness);
 
     return CreateSoftBody(particles, num_vertices, springs, num_vertices + num_diagonals);
-}
-
-//For debugging only
-Particle CreateParticleDEBUG(Vector2 position, float mass, int id)
-{
-    Particle particle = {position, Vector2Zero(), Vector2Zero(), Vector2Zero(), mass, false, id};
-    return particle;
 }
