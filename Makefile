@@ -13,10 +13,16 @@ release: build
 release-linux-win: linux-win
 	./scripts/release.sh -w
 
-debug: build
+build-debug: 
+	./scripts/build.sh -f linux -t linux -g
+
+build-debug-win:
+	./scripts/build.sh -f windows -t windows -g
+
+debug: build-debug
 	gdb ./game
 
-debug-win: win
+debug-win: build-debug-win
 	gdb ./game.exe
 
 run:

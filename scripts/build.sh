@@ -5,12 +5,13 @@ OUTPUT_FILE_DIR=.
 OUTPUT_FILE_NAME=game
 
 COMPILER_BIN="gcc"
-BUILD_FLAGS="-I./raylib-5.0 -L./raylib-5.0 -lraylib -lm -lpthread"
+BUILD_FLAGS="-Wall -I./raylib-5.0 -L./raylib-5.0 -lraylib -lm -lpthread"
+BUILD_CMD="$COMPILER_BIN $SOURCE_FILE_PATH -o $OUTPUT_FILE_DIR/$OUTPUT_FILE_NAME $BUILD_FLAGS"
 
 OS_FROM="Linux"
 OS_FOR="Linux"
 
-while getopts 'f:t:' FLAG; do
+while getopts 'f:t:g' FLAG; do
     case "$FLAG" in
         f)
             case "$OPTARG" in
@@ -38,6 +39,9 @@ while getopts 'f:t:' FLAG; do
                     ;;
             esac
             ;;
+        g)
+            BUILD_CMD="$BUILD_CMD -g"
+            ;;
     esac
 done
 
@@ -53,9 +57,10 @@ echo "Source: $SOURCE_FILE_PATH"
 echo "Desired output: $OUTPUT_FILE_DIR/$OUTPUT_FILE_NAME"
 echo "COMPILER_BIN: $COMPILER_BIN"
 echo "BUILD_FLAGS: $BUILD_FLAGS"
+echo "BUILD_CMD: $BUILD_CMD"
 echo "---------------------------------"
 
-$COMPILER_BIN $SOURCE_FILE_PATH -o $OUTPUT_FILE_DIR/$OUTPUT_FILE_NAME $BUILD_FLAGS && \
+$BUILD_CMD && \
 
     echo "✅ Build finished successfully!
 Output path: $OUTPUT_FILE_DIR/$OUTPUT_FILE_NAME" || \
