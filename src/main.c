@@ -1,11 +1,12 @@
 #include "fizziks.h"
 #include "debug.h"
+#include <raylib.h>
 
 const Color NODE_COLOR = YELLOW;
 const float SIMULATION_SPEED = 2.0;
 const float MAX_VELOCITY_VALUE = 5000;
 const float NODE_RADIUS = 5.0;
-const float SPRING_THICKNESS = 3.0;
+const float SPRING_THICKNESS = 2.5;
 const float DEFAULT_SPRING_STIFFNESS = 400.0;
 const float DEFAULT_SPRING_DAMPENING = 50.0;
 const float FRICTION = 0.0125;
