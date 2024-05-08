@@ -1,6 +1,5 @@
 #include "fizziks.h"
 #include "debug.h"
-#include <raylib.h>
 
 const Color NODE_COLOR = YELLOW;
 const float SIMULATION_SPEED = 2.0;
