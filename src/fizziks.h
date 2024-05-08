@@ -1,6 +1,10 @@
 #ifndef FIZZIKS_H
 #define FIZZIKS_H
 
+#ifndef EPSILON
+    #define EPSILON 0.0001f
+#endif
+
 #include <float.h>
 #include "raylib.h"
 #include "raymath.h"

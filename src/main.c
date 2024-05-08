@@ -20,6 +20,7 @@ DebugInfo* constants[] = {
     &((DebugInfo) { "SPRING DAMPENING", DEFAULT_SPRING_DAMPENING, "%.1f" }),
     &((DebugInfo) { "MAX VELOCITY", MAX_VELOCITY_VALUE, "%.1f" }),
     &((DebugInfo) { "SIMULATION SPEED", SIMULATION_SPEED, "%.1f" }),
+    &((DebugInfo) { "EPSILON", EPSILON, "%.8f" }),
 };
 
 int constants_length = sizeof(constants) / sizeof(constants[0]);
