@@ -3,6 +3,12 @@
 
 #include "fizziks.h"
 
+#ifndef DEBUG_VARS
+#define FONT_SIZE 16.0
+#define SPACING 8.0
+#define COLOR WHITE
+#endif
+
 extern const int WINDOW_WIDTH;
 extern const int WINDOW_HEIGHT;
 extern Font font;

@@ -82,8 +82,8 @@ int main(int _argc, char *_argv[])
 
         DEBUG_Draw_Stats(constants, constants_length, (Vector2){10, 30});
         DEBUG_Draw_Stats(variables, variables_length, (Vector2){10, 132});
-        DEBUG_Draw_Particle_Stats(&soft_bodies[0], (Vector2){WINDOW_WIDTH - 250, 10});
-        DEBUG_Draw_Particle_Stats(&soft_bodies[1], (Vector2){WINDOW_WIDTH - 250, 280});
+        DEBUG_Draw_Particle_Stats(&soft_bodies[0], (Vector2){GetScreenWidth() - 400, 10});
+        DEBUG_Draw_Particle_Stats(&soft_bodies[1], (Vector2){GetScreenWidth() - 400, 280});
 
         EndDrawing();
     }
