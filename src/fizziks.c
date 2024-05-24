@@ -107,7 +107,7 @@ int AreSegmentsIntersecting(Segment segment1, Segment segment2)
     Vector2 AC = Vector2Subtract(C, A);
 
     float common_denominator = Vector2CrossProduct(CD, AB);
-    if(common_denominator == 0) return false;
+    if(FloatEquals(common_denominator, 0)) return false;
 
     float t = Vector2CrossProduct(CD, AC) / common_denominator;
     Vector2 M = Vector2Add(A, Vector2Scale(AB, t));
@@ -151,6 +151,10 @@ int GetPointToBodyIntersections(Vector2 *point, SoftBody *soft_body)
     GetSoftBodySides(soft_body, sides);
     for(int i = 0; i < sides_length; i++)
     {
+        if(FloatEquals(point->y, soft_body->bounding_rect.top) || FloatEquals(point->y, soft_body->bounding_rect.bottom))
+            continue;
+
+        intersections += FloatEquals(point->y, soft_body->particles[i].position.y);
         intersections += AreSegmentsIntersecting(horizontal_segment, sides[i]);
     }
     return intersections;
