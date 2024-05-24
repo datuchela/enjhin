@@ -43,6 +43,7 @@ typedef struct Particle {
     bool is_colliding;
 
     int debug_id;
+    int num_intesecting;
 } Particle;
 
 typedef struct Spring {

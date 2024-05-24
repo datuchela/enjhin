@@ -33,6 +33,7 @@ void DEBUG_Draw_Particle_Stats(SoftBody *soft_body, Vector2 position)
         DEBUG_Draw_Stat("ax", soft_body->particles[i].acceleration.x, "%.8f", Vector2Add(position, (Vector2){0, gap_y * 2}));
         DEBUG_Draw_Stat("ay", soft_body->particles[i].acceleration.y, "%.8f", Vector2Add(position, (Vector2){gap_x, gap_y * 2}));
         DEBUG_Draw_Stat("is_colliding", soft_body->particles[i].is_colliding, "%.1f", Vector2Add(position, (Vector2){0, gap_y * 3}));
+        DEBUG_Draw_Stat("numColl", soft_body->particles[i].num_intesecting, "%.1f", Vector2Add(position, (Vector2){gap_x, gap_y * 3}));
         position = Vector2Add(position, (Vector2){0, particle_gap_y});
     }
 }

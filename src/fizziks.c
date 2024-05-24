@@ -54,7 +54,7 @@ void GetSoftBodySides(SoftBody *soft_body, Segment *sides)
         next_particle = &soft_body->particles[i+1];
         sides[i] = (Segment){particle->position, next_particle->position};
     }
-    sides[soft_body->particles_length - 1] = (Segment){soft_body->particles[soft_body->particles_length - 1].position, soft_body->particles[0].position};
+    sides[soft_body->particles_length - 1] = (Segment){soft_body->particles[soft_body->particles_length - 1].position, soft_body->particles[0].position};                
 }
 
 void UpdateSoftBodyBoundingRect(SoftBody *soft_body)
@@ -170,7 +170,8 @@ void ResetSoftBodyCollisions(SoftBody *soft_body)
 
 bool IsParticleIntersectingSoftBody(Particle *particle, SoftBody *soft_body)
 { 
-    return GetPointToBodyIntersections(&particle->position, soft_body) % 2 == 1;
+    particle->num_intesecting = GetPointToBodyIntersections(&particle->position, soft_body);
+    return particle->num_intesecting % 2 == 1;
 }
 
 void HandleCollisionSoftBodies(SoftBody *soft_body1, SoftBody *soft_body2)
