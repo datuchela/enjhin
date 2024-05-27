@@ -96,6 +96,15 @@ void UpdateSoftBodyBoundingRect(SoftBody *soft_body)
     soft_body->bounding_rect.bottom_left = (Vector2){left, bottom};
 }
 
+int AreHSegmentNPointIntersecting(Segment horizontal_segment, Vector2 point) {
+    if(!(point.x > horizontal_segment.start.x && point.x > horizontal_segment.end.x)
+        && !(point.x < horizontal_segment.start.x && point.x < horizontal_segment.end.x)
+    )
+        return FloatEquals(point.y, horizontal_segment.start.y);
+
+    return 0;
+}
+
 int AreSegmentsIntersecting(Segment segment1, Segment segment2)
 {
     Vector2 A = segment1.start;
@@ -146,6 +155,8 @@ int GetPointToBodyIntersections(Vector2 *point, SoftBody *soft_body)
     Vector2 right_point = {rect.right + 10, point->y};
     Segment horizontal_segment = {*point, right_point};
 
+    // DrawLineV(horizontal_segment.start, horizontal_segment.end, BLUE);
+
     int sides_length = soft_body->particles_length;
     Segment sides[sides_length];
     GetSoftBodySides(soft_body, sides);
@@ -154,7 +165,7 @@ int GetPointToBodyIntersections(Vector2 *point, SoftBody *soft_body)
         if(FloatEquals(point->y, soft_body->bounding_rect.top) || FloatEquals(point->y, soft_body->bounding_rect.bottom))
             continue;
 
-        intersections += FloatEquals(point->y, soft_body->particles[i].position.y);
+        intersections += AreHSegmentNPointIntersecting(horizontal_segment, sides[i].start);
         intersections += AreSegmentsIntersecting(horizontal_segment, sides[i]);
     }
     return intersections;

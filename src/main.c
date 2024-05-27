@@ -34,7 +34,7 @@ int main(int _argc, char *_argv[])
     Spring springs1[6];
     Spring springs2[6];
 
-    soft_bodies[0] = CreateSquare(particles1, springs1, 550, 300, 50, 10, DEFAULT_SPRING_STIFFNESS, 2, false);
+    soft_bodies[0] = CreateSquare(particles1, springs1, 350, 400, 50, 10, DEFAULT_SPRING_STIFFNESS, 2, false);
     soft_bodies[1] = CreateSquare(particles2, springs2, 350, 350, 100, 10, DEFAULT_SPRING_STIFFNESS, 2, true);
 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Enjhin");
