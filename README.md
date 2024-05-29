@@ -4,8 +4,8 @@ If you want to see the development in action check out my stream on twitch <http
 I have already done similar thing in [web](https://fizziks-engine.netlify.app)  
 
 ## Authors
-[merabi0013](https://github.com/merabi0013)
-[datuchela](https://github.com/datuchela)
+- [merabi0013](https://github.com/merabi0013)
+- [datuchela](https://github.com/datuchela)
 
 ## todos
 1. [x] - [BUG] collision detection triggers when it shouldn't.
