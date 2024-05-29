@@ -3,6 +3,10 @@ Soft body physics engine in C using [raylib](https://github.com/raysan5/raylib)
 If you want to see the development in action check out my stream on twitch <https://twitch.tv/datuchela>  
 I have already done similar thing in [web](https://fizziks-engine.netlify.app)  
 
+## Authors
+[merabi0013](https://github.com/merabi0013)
+[datuchela](https://github.com/datuchela)
+
 ## todos
 1. [x] - [BUG] collision detection triggers when it shouldn't.
 2. [x] - split up main.c into separate files
