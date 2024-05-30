@@ -16,6 +16,31 @@ float Vector2CrossProduct(Vector2 vector1, Vector2 vector2)
     return vector1.x * vector2.y - vector1.y * vector2.x;
 }
 
+bool IsPointOnSegment(Vector2 point, Segment segment)
+{
+    // bool is_on_segment_down_right = C.x <= M.x && M.x <= D.x && C.y <= M.y && M.y <= D.y;
+    // bool is_on_segment_down_left = C.x >= M.x && M.x >= D.x && C.y <= M.y && M.y <= D.y;
+    // bool is_on_segment_up_left = C.x >= M.x && M.x >= D.x && C.y >= M.y && M.y >= D.y;
+    // bool is_on_segment_up_right = C.x <= M.x && M.x <= D.x && C.y >= M.y && M.y >= D.y;
+
+    bool is_on_segment_down_right = LessOrEquals(segment.start.x, point.x) && LessOrEquals(point.x, segment.end.x)
+        && LessOrEquals(segment.start.y, point.y) && LessOrEquals(point.y, segment.end.y);
+
+    bool is_on_segment_down_left = GreaterOrEquals(segment.start.x, point.x) && GreaterOrEquals(point.x, segment.end.x)
+        && LessOrEquals(segment.start.y, point.y) && LessOrEquals(point.y, segment.end.y);
+
+    bool is_on_segment_up_left = GreaterOrEquals(segment.start.x, point.x) && GreaterOrEquals(point.x, segment.end.x)
+        && GreaterOrEquals(segment.start.y, point.y) && GreaterOrEquals(point.y, segment.end.y);
+
+    bool is_on_segment_up_right = LessOrEquals(segment.start.x, point.x) && LessOrEquals(point.x, segment.end.x)
+        && GreaterOrEquals(segment.start.y, point.y) && GreaterOrEquals(point.y, segment.end.y);
+
+    return (is_on_segment_down_right ||
+    is_on_segment_down_left ||
+    is_on_segment_up_left ||
+    is_on_segment_up_right);
+}
+
 void AttachMouseControls(SoftBody *soft_bodies, int soft_bodies_length, MouseState *mouse_state)
 {
     if(IsMouseButtonDown(0)) 
@@ -122,29 +147,7 @@ int AreSegmentsIntersecting(Segment segment1, Segment segment2)
     Vector2 M = Vector2Add(A, Vector2Scale(AB, t));
 
     bool is_inside_segment = 0 < t && t < 1;
-
-    // bool is_on_segment_down_right = C.x <= M.x && M.x <= D.x && C.y <= M.y && M.y <= D.y;
-    // bool is_on_segment_down_left = C.x >= M.x && M.x >= D.x && C.y <= M.y && M.y <= D.y;
-    // bool is_on_segment_up_left = C.x >= M.x && M.x >= D.x && C.y >= M.y && M.y >= D.y;
-    // bool is_on_segment_up_right = C.x <= M.x && M.x <= D.x && C.y >= M.y && M.y >= D.y;
-
-    bool is_on_segment_down_right = LessOrEquals(C.x, M.x) && LessOrEquals(M.x, D.x)
-        && LessOrEquals(C.y, M.y) && LessOrEquals(M.y, D.y);
-
-    bool is_on_segment_down_left = GreaterOrEquals(C.x, M.x) && GreaterOrEquals(M.x, D.x)
-        && LessOrEquals(C.y, M.y) && LessOrEquals(M.y, D.y);
-
-    bool is_on_segment_up_left = GreaterOrEquals(C.x, M.x) && GreaterOrEquals(M.x, D.x)
-        && GreaterOrEquals(C.y, M.y) && GreaterOrEquals(M.y, D.y);
-
-    bool is_on_segment_up_right = LessOrEquals(C.x, M.x) && LessOrEquals(M.x, D.x)
-        && GreaterOrEquals(C.y, M.y) && GreaterOrEquals(M.y, D.y);
-
-    return is_inside_segment &&
-    (is_on_segment_down_right ||
-    is_on_segment_down_left ||
-    is_on_segment_up_left ||
-    is_on_segment_up_right);
+    return is_inside_segment && IsPointOnSegment(M, segment2);
 }
 
 int GetPointToBodyIntersections(Vector2 *point, SoftBody *soft_body)

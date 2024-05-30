@@ -72,6 +72,8 @@ bool GreaterOrEquals(float a, float b);
 
 float Vector2CrossProduct(Vector2 vector1, Vector2 vector2);
 
+bool IsPointOnSegment(Vector2 point, Segment segment);
+
 //Main Physics Functions
 Spring CreateSpring(Particle *particle1, Particle *particle2, float stiffness);
 void UpdateSpring(Spring *spring);
