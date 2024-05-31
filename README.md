@@ -1,5 +1,5 @@
 # Enjhin
-![screenshot of Enjhin](./screenshot_2024-05-31.jpg)
+![banner of Enjhin](./banner.jpg)
 Soft body physics engine in C using [raylib](https://github.com/raysan5/raylib)  
 If you want to see the development in action check out my stream on twitch <https://twitch.tv/datuchela>  
 I have already done similar thing in [web](https://fizziks-engine.netlify.app)  
