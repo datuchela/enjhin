@@ -128,7 +128,7 @@ int AreHSegmentNPointIntersecting(Segment horizontal_segment, Vector2 point) {
     return 0;
 }
 
-int AreSegmentsIntersecting(Segment segment1, Segment segment2)
+bool AreSegmentsIntersecting(Segment segment1, Segment segment2)
 {
     Vector2 A = segment1.start;
     Vector2 B = segment1.end;
@@ -139,7 +139,7 @@ int AreSegmentsIntersecting(Segment segment1, Segment segment2)
     Vector2 AC = Vector2Subtract(C, A);
 
     float common_denominator = Vector2CrossProduct(CD, AB);
-    if(FloatEquals(common_denominator, 0)) return false;
+    if(common_denominator == 0) return false;
 
     float t = Vector2CrossProduct(CD, AC) / common_denominator;
     Vector2 M = Vector2Add(A, Vector2Scale(AB, t));
@@ -180,8 +180,28 @@ void ResetSoftBodyCollisions(SoftBody *soft_body)
     }
 }
 
+bool IsPointOnSoftBody(Vector2 *point, SoftBody *soft_body) {
+    int sides_length = soft_body->particles_length;
+    Segment sides[sides_length];
+    GetSoftBodySides(soft_body, sides);
+    for (int i = 0; i < soft_body->particles_length; i++)
+    {
+        if(IsPointOnSegment(*point, sides[i])) {
+            bool is_on_line = Vector2CrossProduct(Vector2Subtract(sides[i].end, sides[i].start), Vector2Subtract(*point, sides[i].start)) == 0;
+            if(is_on_line){
+                return true;
+            }
+        }
+    }
+    
+    return false;
+}
+
 bool IsParticleIntersectingSoftBody(Particle *particle, SoftBody *soft_body)
 { 
+    if(IsPointOnSoftBody(&particle->position, soft_body))
+        return true;
+
     particle->num_intesecting = GetPointToBodyIntersections(&particle->position, soft_body);
     return particle->num_intesecting % 2 == 1;
 }
