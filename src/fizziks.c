@@ -122,9 +122,7 @@ void UpdateSoftBodyBoundingRect(SoftBody *soft_body)
 }
 
 int AreHSegmentNPointIntersecting(Segment horizontal_segment, Vector2 point) {
-    if(!(point.x > horizontal_segment.start.x && point.x > horizontal_segment.end.x)
-        && !(point.x < horizontal_segment.start.x && point.x < horizontal_segment.end.x)
-    )
+    if(horizontal_segment.start.x <= point.x && point.x <= horizontal_segment.end.x)
         return FloatEquals(point.y, horizontal_segment.start.y);
 
     return 0;
