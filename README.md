@@ -1,5 +1,4 @@
 # Enjhin
-![banner of Enjhin](./banner.jpg)
 Soft body physics engine in C using [raylib](https://github.com/raysan5/raylib)  
 
 ## todos
