@@ -1,4 +1,7 @@
 #include "debug.h"
+#include "raygui.h"
+#include "raylib.h"
+#include <limits.h>
 
 void DEBUG_Draw_Stat(char *label, float value, const char *value_format,
                      Vector2 position)
@@ -9,16 +12,53 @@ void DEBUG_Draw_Stat(char *label, float value, const char *value_format,
     DrawTextEx(font, text, position, FONT_SIZE, SPACING, COLOR);
 }
 
-void DEBUG_Draw_Stats(DebugInfo *debug_infos[], int debug_infos_length,
-                      Vector2 starting_position)
+void DEBUG_Draw_Stats_old(DebugInfo *debug_infos[], int debug_infos_length,
+                          Vector2 starting_position)
 {
     float line_height = 16;
     for (int i = 0; i < debug_infos_length; i++)
         {
             Vector2 position = Vector2Add(starting_position,
                                           (Vector2){ 0, line_height * i });
-            DEBUG_Draw_Stat(debug_infos[i]->label, debug_infos[i]->value,
+            DEBUG_Draw_Stat(debug_infos[i]->label, *debug_infos[i]->value,
                             debug_infos[i]->value_format, position);
+        }
+}
+
+void DEBUG_Draw_Stats(DebugInfo *debug_infos[], int debug_infos_length,
+                      Vector2 starting_position, bool showSliders)
+{
+    float label_length = 150;
+    float slider_length = 120;
+    float line_height = 10;
+    float gap_y = 20;
+    float gap_x = 4;
+    DebugInfo *debug_info;
+
+    for (int i = 0; i < debug_infos_length; i++)
+        {
+            debug_info = debug_infos[i];
+            Rectangle rec_label = { starting_position.x, starting_position.y,
+                                    label_length, line_height };
+            Rectangle rec_slider
+                = { starting_position.x + label_length + gap_x,
+                    starting_position.y, slider_length, line_height };
+            rec_label.y += i * gap_y;
+            rec_slider.y += i * gap_y;
+
+            const char *min_label = TextFormat("%.f", debug_info->min_value);
+            const char *max_label = TextFormat("%.f", debug_info->max_value);
+
+            const char *formatted_value
+                = TextFormat(debug_info->value_format, *debug_info->value);
+            const char *label
+                = TextFormat("%s: %s", debug_info->label, formatted_value);
+
+            GuiLabel(rec_label, label);
+            if (debug_info->type == TYPE_EDITABLE && !GuiIsLocked())
+                GuiSliderBar(rec_slider, min_label, max_label,
+                             debug_info->value, debug_info->min_value,
+                             debug_info->max_value);
         }
 }
 

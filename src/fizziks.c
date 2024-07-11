@@ -1,4 +1,5 @@
 #include "fizziks.h"
+#include "raylib.h"
 #include <assert.h>
 
 bool LessOrEquals(float a, float b)
@@ -237,7 +238,7 @@ bool IsParticleIntersectingSoftBody(Particle *particle, SoftBody *soft_body)
     return particle->num_intesecting % 2 == 1;
 }
 
-void HandleCollisionSoftBodies(SoftBody *soft_body1, SoftBody *soft_body2)
+void DetectCollisionSoftBodies(SoftBody *soft_body1, SoftBody *soft_body2)
 {
     Particle *particle;
     for (int i = 0; i < soft_body1->particles_length; i++)
