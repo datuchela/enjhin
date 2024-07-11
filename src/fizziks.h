@@ -93,15 +93,14 @@ void UpdateParticle(Particle *particle, double dt);
 void DrawParticle(Particle *particle);
 
 void ResetParticleForces(Particle *particle);
-void UpdateParticleAcceleration(Particle *particle, double dt);
+void UpdateParticleAcceleration(Particle *particle);
 void UpdateParticleVelocity(Particle *particle, double dt);
 void ClampParticleVelocity(Particle *particle);
 void AddParticleFriction(Particle *particle);
 void UpdateParticlePosition(Particle *particle, double dt);
 
 void ResetAllParticleForces(Particle *particles, int particles_length);
-void UpdateAllParticleAccelerations(Particle *particles, int particles_length,
-                                    double dt);
+void UpdateAllParticleAccelerations(Particle *particles, int particles_length);
 void UpdateAllParticleVelocities(Particle *particles, int particles_length,
                                  double dt);
 void ClampAllParticleVelocities(Particle *particles, int particles_length);

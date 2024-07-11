@@ -326,7 +326,7 @@ Particle CreateParticle(Vector2 position, float mass)
 
 void UpdateParticle(Particle *particle, double dt)
 {
-    UpdateParticleAcceleration(particle, dt);
+    UpdateParticleAcceleration(particle);
     UpdateParticleVelocity(particle, dt);
     UpdateParticlePosition(particle, dt);
 }
@@ -346,7 +346,7 @@ void ResetParticleForces(Particle *particle)
     particle->force = Vector2Zero();
 }
 
-void UpdateParticleAcceleration(Particle *particle, double dt)
+void UpdateParticleAcceleration(Particle *particle)
 {
     particle->acceleration
         = Vector2Scale(particle->force, 1 / (particle->mass));
@@ -401,12 +401,11 @@ void ResetAllParticleForces(Particle *particles, int particles_length)
         }
 }
 
-void UpdateAllParticleAccelerations(Particle *particles, int particles_length,
-                                    double dt)
+void UpdateAllParticleAccelerations(Particle *particles, int particles_length)
 {
     for (int i = 0; i < particles_length; i++)
         {
-            UpdateParticleAcceleration(&particles[i], dt);
+            UpdateParticleAcceleration(&particles[i]);
         }
 }
 
