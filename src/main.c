@@ -23,9 +23,9 @@ DebugInfo *constants[] = {
     &((DebugInfo){ "EPSILON", EPSILON, "%.8f" }),
 };
 
-int constants_length = sizeof (constants) / sizeof (constants[0]);
+int constants_length = sizeof(constants) / sizeof(constants[0]);
 
-int main (int _argc, char *_argv[])
+int main(int _argc, char *_argv[])
 {
     SoftBody soft_bodies[2] = {};
 
@@ -34,70 +34,69 @@ int main (int _argc, char *_argv[])
     Spring springs1[6];
     Spring springs2[6];
 
-    soft_bodies[0] = CreateSquare (particles1, springs1, 350, 400, 50, 10,
-                                   DEFAULT_SPRING_STIFFNESS, 2, false);
-    soft_bodies[1] = CreateSquare (particles2, springs2, 350, 350, 100, 10,
-                                   DEFAULT_SPRING_STIFFNESS, 2, true);
+    soft_bodies[0] = CreateSquare(particles1, springs1, 350, 400, 50, 10,
+                                  DEFAULT_SPRING_STIFFNESS, 2, false);
+    soft_bodies[1] = CreateSquare(particles2, springs2, 350, 350, 100, 10,
+                                  DEFAULT_SPRING_STIFFNESS, 2, true);
 
-    InitWindow (WINDOW_WIDTH, WINDOW_HEIGHT, "Enjhin");
-    SetTargetFPS (120);
-    SetWindowMonitor (0);
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Enjhin");
+    SetTargetFPS(120);
+    SetWindowMonitor(0);
 
-    font = LoadFont ("assets/fonts/mecha.png");
+    font = LoadFont("assets/fonts/mecha.png");
 
-    BeginDrawing ();
-    ClearBackground (BLACK);
-    EndDrawing ();
+    BeginDrawing();
+    ClearBackground(BLACK);
+    EndDrawing();
 
     double time_now = 0;
     double time_prev;
 
     MouseState mouse_state;
 
-    while (!WindowShouldClose ())
+    while (!WindowShouldClose())
         {
             time_prev = time_now;
-            time_now = GetTime ();
+            time_now = GetTime();
             double dt = (time_now - time_prev) * SIMULATION_SPEED;
 
-            AttachMouseControls (soft_bodies, 2, &mouse_state);
+            AttachMouseControls(soft_bodies, 2, &mouse_state);
 
-            ResetSoftBodyCollisions (&soft_bodies[0]);
-            ResetSoftBodyCollisions (&soft_bodies[1]);
-            HandleCollisionSoftBodies (&soft_bodies[0], &soft_bodies[1]);
-            HandleCollisionSoftBodies (&soft_bodies[1], &soft_bodies[0]);
+            ResetSoftBodyCollisions(&soft_bodies[0]);
+            ResetSoftBodyCollisions(&soft_bodies[1]);
+            HandleCollisionSoftBodies(&soft_bodies[0], &soft_bodies[1]);
+            HandleCollisionSoftBodies(&soft_bodies[1], &soft_bodies[0]);
 
-            UpdateSoftBody (&soft_bodies[0], dt);
-            UpdateSoftBody (&soft_bodies[1], dt);
+            UpdateSoftBody(&soft_bodies[0], dt);
+            UpdateSoftBody(&soft_bodies[1], dt);
 
-            BeginDrawing ();
-            ClearBackground (BLACK);
+            BeginDrawing();
+            ClearBackground(BLACK);
 
-            DrawFPS (10, 10);
-            DrawSoftBody (&soft_bodies[0]);
-            DrawSoftBody (&soft_bodies[1]);
+            DrawFPS(10, 10);
+            DrawSoftBody(&soft_bodies[0]);
+            DrawSoftBody(&soft_bodies[1]);
 
             DebugInfo *variables[] = {
                 &((DebugInfo){ "dt", dt, "%.3f" }),
                 &((DebugInfo){ "is_dragging", mouse_state.is_dragging,
                                "%.1f" }),
             };
-            int variables_length = sizeof (variables) / sizeof (variables[0]);
+            int variables_length = sizeof(variables) / sizeof(variables[0]);
 
-            DEBUG_Draw_Stats (constants, constants_length,
-                              (Vector2){ 10, 30 });
-            DEBUG_Draw_Stats (variables, variables_length,
-                              (Vector2){ 10, 132 });
-            DEBUG_Draw_Particle_Stats (
-                &soft_bodies[0], (Vector2){ GetScreenWidth () - 400, 10 });
-            DEBUG_Draw_Particle_Stats (
-                &soft_bodies[1], (Vector2){ GetScreenWidth () - 400, 280 });
+            DEBUG_Draw_Stats(constants, constants_length, (Vector2){ 10, 30 });
+            DEBUG_Draw_Stats(variables, variables_length,
+                             (Vector2){ 10, 132 });
+            DEBUG_Draw_Particle_Stats(&soft_bodies[0],
+                                      (Vector2){ GetScreenWidth() - 400, 10 });
+            DEBUG_Draw_Particle_Stats(
+                &soft_bodies[1], (Vector2){ GetScreenWidth() - 400, 280 });
 
-            EndDrawing ();
+            EndDrawing();
         }
 
-    UnloadFont (font);
-    CloseWindow ();
+    UnloadFont(font);
+    CloseWindow();
 
     return 0;
 }
