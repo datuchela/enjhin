@@ -5,7 +5,9 @@ OUTPUT_FILE_DIR=.
 OUTPUT_FILE_NAME=game
 
 COMPILER_BIN="gcc"
-BUILD_FLAGS="-Wall -I./raylib-5.0 -L./raylib-5.0 -lraylib -lm -lpthread"
+INCLUDE_PATH="./raylib/raylib-5.0_linux_amd64/include"
+LIB_PATH="./raylib/raylib-5.0_linux_amd64/lib"
+BUILD_FLAGS="-Wall -I$INCLUDE_PATH -L$LIB_PATH -Wl,-R$LIB_PATH -lraylib -lm -lpthread"
 
 OS_FROM="Linux"
 OS_FOR="Linux"
@@ -31,7 +33,9 @@ while getopts 'f:t:g' FLAG; do
                 w|windows)
                     OS_FOR="Windows"
                     OUTPUT_FILE_NAME=game.exe
-                    BUILD_FLAGS="-Wall -I./raylib-5.0_win64_mingw-w64/include -L./raylib-5.0_win64_mingw-w64/lib -lraylib -lm -lpthread -lgdi32 -lwinmm"
+                    INCLUDE_PATH="./raylib/raylib-5.0_win64_mingw-w64/include"
+                    LIB_PATH="./raylib/raylib-5.0_win64_mingw-w64/lib"
+                    BUILD_FLAGS="-Wall -I$INCLUDE_PATH -L$LIB_PATH -Wl,-R$LIB_PATH -lraylib -lm -lpthread -lgdi32 -lwinmm"
                     if [ "$OS_FROM" == "Linux" ]; then
                         COMPILER_BIN="x86_64-w64-mingw32-gcc"
                     fi

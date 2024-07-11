@@ -48,12 +48,12 @@ packages/
 !examples/models/resources/models/obj/
 
 # Ignore compiled binaries
-*.o
-*.exe
-*.a
-*.bc
-*.so
-*.so.*
+./src/*.o
+./src/*.exe
+./src/*.a
+./src/*.bc
+./src/*.so
+./src/*.so.*
 
 # Ignore wasm data in examples/
 examples/**/*.wasm
