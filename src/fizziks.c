@@ -224,14 +224,13 @@ bool IsPointOnSoftBody(Vector2 *point, SoftBody *soft_body)
                         }
                 }
         }
-
     return false;
 }
 
 bool IsParticleIntersectingSoftBody(Particle *particle, SoftBody *soft_body)
 {
     if (IsPointOnSoftBody(&particle->position, soft_body))
-        return true;
+        return false;
 
     particle->num_intesecting
         = GetPointToBodyIntersections(&particle->position, soft_body);
