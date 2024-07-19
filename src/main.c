@@ -1,29 +1,21 @@
 #include "debug.h"
 #include "fizziks.h"
+#include "raygui.h"
+#include "raylib.h"
 
-const Color NODE_COLOR = YELLOW;
-const float SIMULATION_SPEED = 2.0;
-const float MAX_VELOCITY_VALUE = 5000;
-const float NODE_RADIUS = 5.0;
-const float SPRING_THICKNESS = 2.5;
-const float DEFAULT_SPRING_STIFFNESS = 400.0;
-const float DEFAULT_SPRING_DAMPENING = 50.0;
-const float FRICTION = 0.0125;
+float epsilon = EPSILON;
+Color NODE_COLOR = YELLOW;
+float SIMULATION_SPEED = 2.0;
+float MAX_VELOCITY_VALUE = 5000;
+float NODE_RADIUS = 5.0;
+float SPRING_THICKNESS = 2.5;
+float DEFAULT_SPRING_STIFFNESS = 400.0;
+float DEFAULT_SPRING_DAMPENING = 50.0;
+float FRICTION = 0.0125;
 
 const int WINDOW_WIDTH = 1366;
 const int WINDOW_HEIGHT = 800;
 Font font;
-
-DebugInfo *constants[] = {
-    &((DebugInfo){ "FRICTION", FRICTION, "%.3f" }),
-    &((DebugInfo){ "SPRING STIFFNESS", DEFAULT_SPRING_STIFFNESS, "%.1f" }),
-    &((DebugInfo){ "SPRING DAMPENING", DEFAULT_SPRING_DAMPENING, "%.1f" }),
-    &((DebugInfo){ "MAX VELOCITY", MAX_VELOCITY_VALUE, "%.1f" }),
-    &((DebugInfo){ "SIMULATION SPEED", SIMULATION_SPEED, "%.1f" }),
-    &((DebugInfo){ "EPSILON", EPSILON, "%.8f" }),
-};
-
-int constants_length = sizeof(constants) / sizeof(constants[0]);
 
 int main(int _argc, char *_argv[])
 {
@@ -42,33 +34,54 @@ int main(int _argc, char *_argv[])
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Enjhin");
     SetTargetFPS(120);
     SetWindowMonitor(0);
-
     font = LoadFont("assets/fonts/mecha.png");
 
-    BeginDrawing();
-    ClearBackground(BLACK);
-    EndDrawing();
-
-    double time_now = 0;
-    double time_prev;
-
+    float dt;
     MouseState mouse_state;
+    bool isPaused = false;
+    GuiLock();
+
+    DebugInfo *constants[] = {
+        &((DebugInfo){ "FRICTION", &FRICTION, 0.0, 1.0, "%f", TYPE_EDITABLE,
+                       false }),
+        &((DebugInfo){ "SPRING STIFFNESS", &DEFAULT_SPRING_STIFFNESS, 0.0,
+                       2000, "%.1f", TYPE_EDITABLE, false }),
+        &((DebugInfo){ "SPRING DAMPENING", &DEFAULT_SPRING_DAMPENING, 0.0,
+                       300.0, "%.1f", TYPE_EDITABLE, false }),
+        &((DebugInfo){ "MAX VELOCITY", &MAX_VELOCITY_VALUE, 0.0, 10000, "%.1f",
+                       TYPE_EDITABLE, false }),
+        &((DebugInfo){ "SIMULATION SPEED", &SIMULATION_SPEED, 0.0, 10.0,
+                       "%.1f", TYPE_EDITABLE, false }),
+        &((DebugInfo){ "EPSILON", &epsilon, 0.0, 10.0, "%f", TYPE_CONSTANT,
+                       false }),
+        &((DebugInfo){ "dt", &dt, 0.0, 10.0, "%f", TYPE_CONSTANT, false }),
+    };
+    int constants_length = sizeof(constants) / sizeof(constants[0]);
 
     while (!WindowShouldClose())
         {
-            time_prev = time_now;
-            time_now = GetTime();
-            double dt = (time_now - time_prev) * SIMULATION_SPEED;
+            if (IsKeyPressed(KEY_P))
+                {
+                    isPaused = !isPaused;
+                    isPaused ? GuiUnlock() : GuiLock();
+                }
 
-            AttachMouseControls(soft_bodies, 2, &mouse_state);
+            dt = GetFrameTime() * SIMULATION_SPEED;
 
-            ResetSoftBodyCollisions(&soft_bodies[0]);
-            ResetSoftBodyCollisions(&soft_bodies[1]);
-            HandleCollisionSoftBodies(&soft_bodies[0], &soft_bodies[1]);
-            HandleCollisionSoftBodies(&soft_bodies[1], &soft_bodies[0]);
+            if (!isPaused)
+                {
+                    AttachMouseControls(soft_bodies, 2, &mouse_state);
 
-            UpdateSoftBody(&soft_bodies[0], dt);
-            UpdateSoftBody(&soft_bodies[1], dt);
+                    ResetSoftBodyCollisions(&soft_bodies[0]);
+                    ResetSoftBodyCollisions(&soft_bodies[1]);
+                    DetectCollisionSoftBodies(&soft_bodies[0],
+                                              &soft_bodies[1]);
+                    DetectCollisionSoftBodies(&soft_bodies[1],
+                                              &soft_bodies[0]);
+
+                    UpdateSoftBody(&soft_bodies[0], dt);
+                    UpdateSoftBody(&soft_bodies[1], dt);
+                }
 
             BeginDrawing();
             ClearBackground(BLACK);
@@ -77,16 +90,12 @@ int main(int _argc, char *_argv[])
             DrawSoftBody(&soft_bodies[0]);
             DrawSoftBody(&soft_bodies[1]);
 
-            DebugInfo *variables[] = {
-                &((DebugInfo){ "dt", dt, "%.3f" }),
-                &((DebugInfo){ "is_dragging", mouse_state.is_dragging,
-                               "%.1f" }),
-            };
-            int variables_length = sizeof(variables) / sizeof(variables[0]);
+            GuiLabel((Rectangle){ 16, GetScreenHeight() - 32, 200, 24 },
+                     TextFormat("%s", isPaused ? "PAUSED (press 'p' to resume)"
+                                               : "press 'p' to PAUSE"));
+            DEBUG_Draw_Stats(constants, constants_length, (Vector2){ 10, 40 },
+                             isPaused);
 
-            DEBUG_Draw_Stats(constants, constants_length, (Vector2){ 10, 30 });
-            DEBUG_Draw_Stats(variables, variables_length,
-                             (Vector2){ 10, 132 });
             DEBUG_Draw_Particle_Stats(&soft_bodies[0],
                                       (Vector2){ GetScreenWidth() - 400, 10 });
             DEBUG_Draw_Particle_Stats(

@@ -9,14 +9,14 @@
 #include "raymath.h"
 #include <float.h>
 
-extern const Color NODE_COLOR;
-extern const float SIMULATION_SPEED;
-extern const float MAX_VELOCITY_VALUE;
-extern const float NODE_RADIUS;
-extern const float SPRING_THICKNESS;
-extern const float DEFAULT_SPRING_STIFFNESS;
-extern const float DEFAULT_SPRING_DAMPENING;
-extern const float FRICTION;
+extern Color NODE_COLOR;
+extern float SIMULATION_SPEED;
+extern float MAX_VELOCITY_VALUE;
+extern float NODE_RADIUS;
+extern float SPRING_THICKNESS;
+extern float DEFAULT_SPRING_STIFFNESS;
+extern float DEFAULT_SPRING_DAMPENING;
+extern float FRICTION;
 
 typedef struct Segment
 {
@@ -93,15 +93,14 @@ void UpdateParticle(Particle *particle, double dt);
 void DrawParticle(Particle *particle);
 
 void ResetParticleForces(Particle *particle);
-void UpdateParticleAcceleration(Particle *particle, double dt);
+void UpdateParticleAcceleration(Particle *particle);
 void UpdateParticleVelocity(Particle *particle, double dt);
 void ClampParticleVelocity(Particle *particle);
 void AddParticleFriction(Particle *particle);
 void UpdateParticlePosition(Particle *particle, double dt);
 
 void ResetAllParticleForces(Particle *particles, int particles_length);
-void UpdateAllParticleAccelerations(Particle *particles, int particles_length,
-                                    double dt);
+void UpdateAllParticleAccelerations(Particle *particles, int particles_length);
 void UpdateAllParticleVelocities(Particle *particles, int particles_length,
                                  double dt);
 void ClampAllParticleVelocities(Particle *particles, int particles_length);
@@ -124,7 +123,7 @@ void GetSoftBodySides(SoftBody *soft_body, Segment sides[]);
 void UpdateSoftBodyBoundingRect(SoftBody *soft_body);
 int GetPointToBodyIntersections(Vector2 *point, SoftBody *soft_body);
 bool IsParticleIntersectingSoftBody(Particle *particle, SoftBody *soft_body);
-void HandleCollisionSoftBodies(SoftBody *soft_body1, SoftBody *soft_body2);
+void DetectCollisionSoftBodies(SoftBody *soft_body1, SoftBody *soft_body2);
 void ResetSoftBodyCollisions(SoftBody *soft_body);
 int GetSegmentIntersectionAmount(Segment segment1, Segment segment2);
 

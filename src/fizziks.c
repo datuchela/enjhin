@@ -1,4 +1,5 @@
 #include "fizziks.h"
+#include "raylib.h"
 #include <assert.h>
 
 bool LessOrEquals(float a, float b)
@@ -223,21 +224,20 @@ bool IsPointOnSoftBody(Vector2 *point, SoftBody *soft_body)
                         }
                 }
         }
-
     return false;
 }
 
 bool IsParticleIntersectingSoftBody(Particle *particle, SoftBody *soft_body)
 {
     if (IsPointOnSoftBody(&particle->position, soft_body))
-        return true;
+        return false;
 
     particle->num_intesecting
         = GetPointToBodyIntersections(&particle->position, soft_body);
     return particle->num_intesecting % 2 == 1;
 }
 
-void HandleCollisionSoftBodies(SoftBody *soft_body1, SoftBody *soft_body2)
+void DetectCollisionSoftBodies(SoftBody *soft_body1, SoftBody *soft_body2)
 {
     Particle *particle;
     for (int i = 0; i < soft_body1->particles_length; i++)
@@ -326,7 +326,7 @@ Particle CreateParticle(Vector2 position, float mass)
 
 void UpdateParticle(Particle *particle, double dt)
 {
-    UpdateParticleAcceleration(particle, dt);
+    UpdateParticleAcceleration(particle);
     UpdateParticleVelocity(particle, dt);
     UpdateParticlePosition(particle, dt);
 }
@@ -346,7 +346,7 @@ void ResetParticleForces(Particle *particle)
     particle->force = Vector2Zero();
 }
 
-void UpdateParticleAcceleration(Particle *particle, double dt)
+void UpdateParticleAcceleration(Particle *particle)
 {
     particle->acceleration
         = Vector2Scale(particle->force, 1 / (particle->mass));
@@ -401,12 +401,11 @@ void ResetAllParticleForces(Particle *particles, int particles_length)
         }
 }
 
-void UpdateAllParticleAccelerations(Particle *particles, int particles_length,
-                                    double dt)
+void UpdateAllParticleAccelerations(Particle *particles, int particles_length)
 {
     for (int i = 0; i < particles_length; i++)
         {
-            UpdateParticleAcceleration(&particles[i], dt);
+            UpdateParticleAcceleration(&particles[i]);
         }
 }
 
