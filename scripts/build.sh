@@ -45,10 +45,12 @@ while getopts 'f:t:g' FLAG; do
         g)
             BUILD_FLAGS="-g3 $BUILD_FLAGS"
             ;;
+        *)
+            ;;
     esac
 done
 
-if !(test -d $OUTPUT_FILE_DIR); then
+if ! test -d $OUTPUT_FILE_DIR; then
     mkdir $OUTPUT_FILE_DIR
 fi
 
