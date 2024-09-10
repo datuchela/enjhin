@@ -1,32 +1,32 @@
-build: 
-	./scripts/build.sh -f linux -t linux
+SOURCE_FILES_PATH := ./src/raygui.c ./src/debug.c ./src/fizziks.c ./src/main.c
 
-win:
-	./scripts/build.sh -f windows -t windows
-
-run:
-	./game
-
-linux-win:
-	./scripts/build.sh -f linux -t windows
-
-release: build
-	./scripts/release.sh
-
-release-linux-win: linux-win
-	./scripts/release.sh -w
-
-debug: build-debug
-	gdb ./game
-
-debug-win: build-debug-win
-	gdb ./game.exe
-
-build-debug: 
+# Builds binary with debugging information on Linux
+debug: $(SOURCE_FILES_PATH)
 	./scripts/build.sh -f linux -t linux -g
 
-build-debug-win:
+# Builds binary without debugging information on Linux
+release: $(SOURCE_FILES_PATH)
+	./scripts/build.sh -f linux -t linux
+
+# Builds Windows executable (.exe) on Linux
+linux-win-release: $(SOURCE_FILES_PATH)
+	./scripts/build.sh -f linux -t windows
+
+# Builds binary with debugging information on Windows
+win-debug: $(SOURCE_FILES_PATH)
 	./scripts/build.sh -f windows -t windows -g
+
+# Builds binary without debugging information on Windows
+win-release: $(SOURCE_FILES_PATH)
+	./scripts/build.sh -f windows -t windows
+
+# Builds and packages up the binary with assets for Linux on Linux
+package: release
+	./scripts/package.sh
+
+# Builds and packages up the binary with assets for Windows on Linux
+linux-win-package: linux-win-release
+	./scripts/package.sh -w
 
 raylib:
 	cd ./raylib-5.0/src && \
