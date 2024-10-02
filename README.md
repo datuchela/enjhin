@@ -1,6 +1,8 @@
 # Enjhin
 Soft body physics engine in C using [raylib](https://github.com/raysan5/raylib)  
 
+![A GIF showcasing Enjhin](./docs/enjhin-animation.gif)
+
 ## todos
 1. [ ] - implement changing global variables at runtime.
 2. [ ] - implement enumeration of particle debug_ids for every soft_body.
