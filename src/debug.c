@@ -26,7 +26,7 @@ void DEBUG_Draw_Stats_old(DebugInfo *debug_infos[], int debug_infos_length,
 }
 
 void DEBUG_Draw_Stats(DebugInfo *debug_infos[], int debug_infos_length,
-                      Vector2 starting_position, bool showSliders)
+                      Vector2 starting_position)
 {
     float label_length = 150;
     float slider_length = 120;

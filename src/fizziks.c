@@ -1,6 +1,7 @@
 #include "fizziks.h"
 #include "raylib.h"
 #include <assert.h>
+#include <raymath.h>
 
 bool LessOrEquals(float a, float b)
 {
@@ -53,9 +54,10 @@ bool IsPointOnSegment(Vector2 point, Segment segment)
 void AttachMouseControls(SoftBody *soft_bodies, int soft_bodies_length,
                          MouseState *mouse_state)
 {
-    if (IsMouseButtonDown(0))
+    Vector2 mouse_position = GetMousePosition();
+    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)
+        && !CheckCollisionPointRec(mouse_position, mouse_state->deadzone))
         {
-            Vector2 mouse_position = GetMousePosition();
             if (!mouse_state->is_dragging)
                 {
                     float closest_distance = FLT_MAX;
@@ -196,6 +198,34 @@ int GetPointToBodyIntersections(Vector2 *point, SoftBody *soft_body)
     return intersections;
 }
 
+void BoundaryCollisionBox(Rectangle box, SoftBody *soft_body)
+{
+    for (int i = 0; i < soft_body->particles_length; ++i)
+        {
+            Particle *p = &soft_body->particles[i];
+            if (p->position.x >= box.x + box.width)
+                {
+                    p->position.x = box.x + box.width;
+                    p->velocity.x = -p->velocity.x;
+                }
+            if (p->position.x <= box.x)
+                {
+                    p->position.x = box.x;
+                    p->velocity.x = -p->velocity.x;
+                }
+            if (p->position.y >= box.y + box.height)
+                {
+                    p->position.y = box.y + box.height;
+                    p->velocity.y = -p->velocity.y;
+                }
+            if (p->position.y <= box.y)
+                {
+                    p->position.y = box.y;
+                    p->velocity.y = -p->velocity.y;
+                }
+        }
+}
+
 void ResetSoftBodyCollisions(SoftBody *soft_body)
 {
     for (int i = 0; i < soft_body->particles_length; i++)
@@ -248,13 +278,64 @@ void DetectCollisionSoftBodies(SoftBody *soft_body1, SoftBody *soft_body2)
         }
 }
 
+Spring *GetClosestEdgeToPoint(SoftBody *soft_body, Vector2 point)
+{
+    Spring *closest_edge = &soft_body->springs[0];
+    Vector2 closest_edge_middle = Vector2Add(
+        Vector2Scale(Vector2Subtract(closest_edge->particles[0]->position,
+                                     closest_edge->particles[1]->position),
+                     0.5),
+        closest_edge->particles[1]->position);
+    float closest_distance
+        = Vector2Length(Vector2Subtract(point, closest_edge_middle));
+    Spring *curr_edge;
+    for (int i = 0; i < soft_body->springs_length; ++i)
+        {
+            curr_edge = &soft_body->springs[i];
+            Vector2 curr_edge_middle = Vector2Add(
+                Vector2Scale(
+                    Vector2Subtract(curr_edge->particles[0]->position,
+                                    curr_edge->particles[1]->position),
+                    0.5),
+                curr_edge->particles[1]->position);
+            float curr_distance
+                = Vector2Length(Vector2Subtract(point, curr_edge_middle));
+            if (curr_distance < closest_distance)
+                {
+                    closest_edge = curr_edge;
+                    closest_edge_middle = Vector2Add(
+                        Vector2Scale(Vector2Subtract(
+                                         closest_edge->particles[0]->position,
+                                         closest_edge->particles[1]->position),
+                                     0.5),
+                        closest_edge->particles[1]->position);
+                    closest_distance = Vector2Length(
+                        Vector2Subtract(point, closest_edge_middle));
+                }
+        }
+    return closest_edge;
+}
+
+void HandleCollisionSoftBodies(SoftBody *soft_body1, SoftBody *soft_body2)
+{
+    Particle *p;
+    for (int i = 0; i < soft_body1->particles_length; ++i)
+        {
+            p = &soft_body1->particles[i];
+            if (!p->is_colliding)
+                continue;
+            Spring *edge = GetClosestEdgeToPoint(soft_body2, p->position);
+            edge->color = YELLOW;
+        }
+}
+
 Spring CreateSpring(Particle *particle1, Particle *particle2, float stiffness)
 {
     float rest_length
         = Vector2Distance(particle1->position, particle2->position);
     Spring spring = {
         { particle1, particle2 },
-        stiffness, rest_length
+        stiffness, rest_length, RAYWHITE
     };
     return spring;
 }
@@ -270,12 +351,13 @@ void UpdateSpring(Spring *spring)
     Vector2 tension0 = Vector2Scale(tension_direction, -delta_length);
     Vector2 tension1 = Vector2Scale(tension_direction, delta_length);
 
+    // TODO: use springs stiffness instead of default value
     spring->particles[0]->force
         = Vector2Add(spring->particles[0]->force,
-                     Vector2Scale(tension0, spring->stiffness));
+                     Vector2Scale(tension0, variable_constants.spring_stiffness));
     spring->particles[1]->force
         = Vector2Add(spring->particles[1]->force,
-                     Vector2Scale(tension1, spring->stiffness));
+                     Vector2Scale(tension1, variable_constants.spring_stiffness));
 
     DampenSpring(spring, tension_direction);
 }
@@ -283,7 +365,9 @@ void UpdateSpring(Spring *spring)
 void DrawSpring(Spring *spring)
 {
     DrawLineEx(spring->particles[0]->position, spring->particles[1]->position,
-               SPRING_THICKNESS, RAYWHITE);
+               variable_constants.spring_thickness, spring->color);
+    // TODO: for debug only:
+    spring->color = RAYWHITE;
 }
 
 void DampenSpring(Spring *spring, Vector2 tension_direction)
@@ -293,7 +377,7 @@ void DampenSpring(Spring *spring, Vector2 tension_direction)
     Vector2 dampening_force
         = Vector2Scale(tension_direction,
                        Vector2DotProduct(tension_direction, relative_velocity)
-                           * DEFAULT_SPRING_DAMPENING);
+                           * variable_constants.spring_dampening);
 
     spring->particles[0]->force
         = Vector2Add(spring->particles[0]->force, dampening_force);
@@ -333,12 +417,12 @@ void UpdateParticle(Particle *particle, double dt)
 
 void DrawParticle(Particle *particle)
 {
-    Color draw_color = NODE_COLOR;
+    Color draw_color = variable_constants.node_color;
     if (particle->is_colliding == true)
         {
             draw_color = RED;
         }
-    DrawCircleV(particle->position, NODE_RADIUS, draw_color);
+    DrawCircleV(particle->position, variable_constants.node_radius, draw_color);
 }
 
 void ResetParticleForces(Particle *particle)
@@ -362,13 +446,13 @@ void UpdateParticleVelocity(Particle *particle, double dt)
 
 void AddParticleFriction(Particle *particle)
 {
-    particle->velocity = Vector2Scale(particle->velocity, 1 - FRICTION);
+    particle->velocity = Vector2Scale(particle->velocity, 1 - variable_constants.friction);
 }
 
 void ClampParticleVelocity(Particle *particle)
 {
     particle->velocity = Vector2ClampValue(
-        particle->velocity, -MAX_VELOCITY_VALUE, MAX_VELOCITY_VALUE);
+        particle->velocity, -variable_constants.max_velocity_value, variable_constants.max_velocity_value);
 }
 
 void UpdateParticlePosition(Particle *particle, double dt)
@@ -459,20 +543,40 @@ void DragParticleByMouse(Particle *particle, Vector2 mouse_position)
     particle->position = mouse_position;
 }
 
-SoftBody CreateSoftBody(Particle *particles, int particles_length,
-                        Spring *springs, int springs_length)
+SoftBody CreateSoftBody(
+    Particle *particles, int particles_length,
+    //                        Particle *edge_particles, int
+    //                        edge_particles_length,
+    Spring *springs, int springs_length
+    //                        Spring *edge_springs, int edge_springs_length
+)
 {
-    SoftBody soft_body;
-    soft_body.particles = particles;
-    soft_body.springs = springs;
-    soft_body.particles_length = particles_length;
-    soft_body.springs_length = springs_length;
+    SoftBody soft_body = {
+        .particles = particles,
+        .springs = springs,
+        .particles_length = particles_length,
+        .springs_length = springs_length,
+        //        .edge_particles = edge_particles,
+        //        .edge_springs = edge_springs,
+        //        .edge_particles_length = edge_particles_length,
+        //        .edge_springs_length = edge_springs_length,
+    };
     return soft_body;
+}
+
+void Gravity(SoftBody *soft_body, Vector2 g)
+{
+    for (int i = 0; i < soft_body->particles_length; ++i)
+        {
+            Particle *p = &soft_body->particles[i];
+            p->force = Vector2Add(p->force, Vector2Scale(g, p->mass));
+        }
 }
 
 void UpdateSoftBody(SoftBody *soft_body, double dt)
 {
     ResetAllParticleForces(soft_body->particles, soft_body->particles_length);
+    Gravity(soft_body, variable_constants.gravity);
     UpdateAllSprings(soft_body->springs, soft_body->springs_length);
     UpdateAllParticles(soft_body->particles, soft_body->particles_length, dt);
 }
@@ -488,7 +592,7 @@ void DrawSoftBody(SoftBody *soft_body)
 }
 
 // Methods for Simple Shapes
-SoftBody CreateSquare(Particle *particles, Spring *springs, float init_x,
+void CreateSquare(SoftBody *soft_body, Particle *particles, Spring *springs, float init_x,
                       float init_y, float width, float part_mass,
                       float stiffness, int num_diagonals,
                       bool flag_right_diagonal)
@@ -534,6 +638,6 @@ SoftBody CreateSquare(Particle *particles, Spring *springs, float init_x,
             = CreateSpring(&particles[order_for_diagonals[2]],
                            &particles[order_for_diagonals[3]], stiffness);
 
-    return CreateSoftBody(particles, num_vertices, springs,
+    *soft_body = CreateSoftBody(particles, num_vertices, springs,
                           num_vertices + num_diagonals);
 }

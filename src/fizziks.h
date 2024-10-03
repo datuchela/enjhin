@@ -9,14 +9,33 @@
 #include "raymath.h"
 #include <float.h>
 
-extern Color NODE_COLOR;
-extern float SIMULATION_SPEED;
-extern float MAX_VELOCITY_VALUE;
-extern float NODE_RADIUS;
-extern float SPRING_THICKNESS;
-extern float DEFAULT_SPRING_STIFFNESS;
-extern float DEFAULT_SPRING_DAMPENING;
-extern float FRICTION;
+#define LENGTH(arr) sizeof(arr) / sizeof(arr[0])
+
+extern const Color NODE_COLOR;
+extern const float SIMULATION_SPEED;
+extern const float MAX_VELOCITY_VALUE;
+extern const float NODE_RADIUS;
+extern const float SPRING_THICKNESS;
+extern const float DEFAULT_SPRING_STIFFNESS;
+extern const float DEFAULT_SPRING_DAMPENING;
+extern const float FRICTION;
+extern const Vector2 DEFAULT_GRAVITY;
+
+typedef struct VariableConstants
+{
+    float epsilon;
+    Color node_color;
+    float simulation_speed;
+    float max_velocity_value;
+    float node_radius;
+    float spring_thickness;
+    float spring_stiffness;
+    float spring_dampening;
+    float friction;
+    Vector2 gravity;
+} VariableConstants;
+
+extern VariableConstants variable_constants;
 
 typedef struct Segment
 {
@@ -54,14 +73,19 @@ typedef struct Spring
     Particle *particles[2];
     float stiffness;
     float rest_length;
+    Color color;
 } Spring;
 
 typedef struct SoftBody
 {
     Spring *springs;
-    Particle *particles;
     int springs_length;
+    Spring *edge_springs;
+    int edge_springs_length;
+    Particle *particles;
     int particles_length;
+    Particle *edge_particles;
+    int edge_particles_length;
     BoundingRect bounding_rect;
 } SoftBody;
 
@@ -69,6 +93,7 @@ typedef struct MouseState
 {
     bool is_dragging;
     Particle *particle;
+    Rectangle deadzone;
 } MouseState;
 
 // Math Functions
@@ -114,8 +139,13 @@ Particle *FindNearestParticleV(Vector2 position, SoftBody *soft_body);
 void AttachMouseControls(SoftBody *soft_bodies, int soft_bodies_length,
                          MouseState *mouse_state);
 
-SoftBody CreateSoftBody(Particle *particles, int particles_length,
-                        Spring *springs, int springs_length);
+SoftBody CreateSoftBody(
+    Particle *particles, int particles_length,
+    //                        Particle *edge_particles, int
+    //                        edge_particles_length,
+    Spring *springs, int springs_length
+    //                        Spring *edge_springs, int edge_springs_length
+);
 void UpdateSoftBody(SoftBody *soft_body, double dt);
 void DrawSoftBody(SoftBody *soft_body);
 
@@ -124,11 +154,14 @@ void UpdateSoftBodyBoundingRect(SoftBody *soft_body);
 int GetPointToBodyIntersections(Vector2 *point, SoftBody *soft_body);
 bool IsParticleIntersectingSoftBody(Particle *particle, SoftBody *soft_body);
 void DetectCollisionSoftBodies(SoftBody *soft_body1, SoftBody *soft_body2);
+Spring *GetClosestEdgeToPoint(SoftBody *soft_body, Vector2 point);
+void HandleCollisionSoftBodies(SoftBody *soft_body1, SoftBody *soft_body2);
+void BoundaryCollisionBox(Rectangle box, SoftBody *soft_body);
 void ResetSoftBodyCollisions(SoftBody *soft_body);
 int GetSegmentIntersectionAmount(Segment segment1, Segment segment2);
 
 // Methods To Create Simple Shapes
-SoftBody CreateSquare(Particle *particles, Spring *springs, float init_x,
+void CreateSquare(SoftBody *soft_body, Particle *particles, Spring *springs, float init_x,
                       float init_y, float width, float part_mass,
                       float stiffness, int num_diagonals,
                       bool flag_right_diagonal);
