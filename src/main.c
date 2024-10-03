@@ -129,10 +129,6 @@ int main(int _argc, char *_argv[])
                                               &soft_bodies[1]);
                     DetectCollisionSoftBodies(&soft_bodies[1],
                                               &soft_bodies[0]);
-                    HandleCollisionSoftBodies(&soft_bodies[0],
-                                              &soft_bodies[1]);
-                    HandleCollisionSoftBodies(&soft_bodies[1],
-                                              &soft_bodies[0]);
 
                     UpdateSoftBody(&soft_bodies[0], dt);
                     UpdateSoftBody(&soft_bodies[1], dt);
