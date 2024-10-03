@@ -1,9 +1,8 @@
 *.zip
-game
-game.exe
+/obj
+enjhin
+enjhin.exe
 /releases
-/dist
-/bin
+
 windowsEOL
 .vscode/
-screenshots/

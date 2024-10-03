@@ -1,35 +1,43 @@
-SOURCE_FILES_PATH := ./src/raygui.c ./src/debug.c ./src/fizziks.c ./src/main.c
+SRC := $(wildcard src/*.c)
+OBJ := $(patsubst src/%.c, obj/%.o, $(SRC))
+OUT := enjhin
 
-# Builds binary with debugging information on Linux
-debug: $(SOURCE_FILES_PATH)
-	./scripts/build.sh -f linux -t linux -g
+# Default to Linux settings
+CC := cc
+INCLUDE_PATH := ./raylib/raylib-5.0_linux_amd64/include
+LIB_PATH := ./raylib/raylib-5.0_linux_amd64/lib
 
-# Builds binary without debugging information on Linux
-release: $(SOURCE_FILES_PATH)
-	./scripts/build.sh -f linux -t linux
+CFLAGS := -Wall -I$(INCLUDE_PATH)
+LDFLAGS := -L$(LIB_PATH) -Wl,-R$(LIB_PATH) -l:libraylib.a -lm -lpthread
 
-# Builds Windows executable (.exe) on Linux
-linux-win-release: $(SOURCE_FILES_PATH)
-	./scripts/build.sh -f linux -t windows
+# Detect source and target OS
+OS_FROM := linux
+OS_FOR := linux
 
-# Builds binary with debugging information on Windows
-win-debug: $(SOURCE_FILES_PATH)
-	./scripts/build.sh -f windows -t windows -g
+# Parse flags (e.g., make OS_FROM=linux OS_FOR=windows)
+ifeq ($(OS_FOR), windows)
+	OUT := $(OUT).exe
+	INCLUDE_PATH := ./raylib/raylib-5.0_win64_mingw-w64/include
+	LIB_PATH := ./raylib/raylib-5.0_win64_mingw-w64/lib
+	CFLAGS := -Wall -I$(INCLUDE_PATH)
+	LDFLAGS := -L$(LIB_PATH) -Wl,-R$(LIB_PATH) -lraylib -lm -lpthread -lgdi32 -lwinmm
+ifeq ($(OS_FROM), linux)
+        CC := x86_64-w64-mingw32-gcc
+    endif
+endif
 
-# Builds binary without debugging information on Windows
-win-release: $(SOURCE_FILES_PATH)
-	./scripts/build.sh -f windows -t windows
+build: obj $(OBJ)
+	$(CC) $(OBJ) -o $(OUT) $(LDFLAGS)
+	@printf "\e[33mLinking\e[90m %s\e[0m\n" $@
+	@printf "\e[34mDone!\e[0m\n"
 
-# Builds and packages up the binary with assets for Linux on Linux
-package: release
-	./scripts/package.sh
+obj/%.o: src/%.c raylib
+	$(CC) -c $< -o $@ $(CFLAGS) $(CFLAGS)
+	@printf "\e[36mCompile\e[90m %s\e[0m\n" $@
 
-# Builds and packages up the binary with assets for Windows on Linux
-linux-win-package: linux-win-release
-	./scripts/package.sh -w
+obj:
+	mkdir -p obj
 
-raylib:
-	cd ./raylib-5.0/src && \
-		make clean && \
-		make PLATFORM=PLATFORM_DESKTOP
-
+clean:
+	rm -f $(OUT) $(OUT).exe $(OBJ)
+	@printf "\e[34mAll clear!\e[0m\n"
