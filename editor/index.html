@@ -3,37 +3,58 @@
 
 <head>
 	<title>Enjhin editor</title>
+	<style>
+		*,
+		*::before,
+		*::after {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+	</style>
 </head>
 
-<body>
-	<main style="display: flex;">
-		<div>
-			<div style="display: flex; justify-content: space-between;">
-				<ul>
-					<li>
-						<button id="new-body-btn">New Body</button>
-					</li>
-				</ul>
-				<button id="export-btn">Export</button>
+<body style="background-color: #161718; color: #d3d3d3;">
+	<div style="padding: .75rem; display: flex; flex-direction: column; gap: .5rem;">
+		<main style="display: flex; gap: .5rem;">
+			<div style="display: flex; flex-direction: column; gap: .5rem;">
+				<nav
+					style="padding: .25rem; border: 1px solid #5c5d5e; display: flex; justify-content: space-between;">
+					<menu style=" display: flex; gap: 0.5rem; list-style: none;">
+						<li><button style="padding: .125em .25em;"
+								id="mode-select">Select</button></li>
+						<li><button style="padding: .125em .25em;"
+								id="mode-insert">Insert</button></li>
+						<li><button style="padding: .125em .25em;" id="mode-move">Move</button>
+						</li>
+					</menu>
+					<button style="padding: .125em .25em;" id="export">Export</button>
+				</nav>
+				<canvas style="border: 1px solid #5c5d5e;" id="enjhin-editor"></canvas>
 			</div>
-			<canvas id="enjhin-editor"></canvas>
-		</div>
-		<div>
-			<h2>Bodies</h2>
-			<ul id="body-list">
-			</ul>
-			<div>
-				<select id="body-select">
-				</select>
-				<select id="particle-select1">
-				</select>
-				<select id="particle-select2">
-				</select>
-				<button id="attach-btn">Attach</button>
-			</div>
-		</div>
-	</main>
-	<script src="./dist/main.js"></script>
+			<aside style="flex-grow: 1; display: flex; flex-direction: column; gap: .5rem;">
+
+				<nav
+					style="padding: .25rem; border: 1px solid #5c5d5e; display: flex; justify-content: space-between;">
+					<menu style=" display: flex; gap: 0.5rem; list-style: none;">
+						<li>
+							<button style="padding: .125em .25em;" id="new-body">New
+								body</button>
+						</li>
+						<li><button style="padding: .125em .25em;" id="btn">btn</button></li>
+					</menu>
+					<button style="padding: .125em .25em;" id="export">Delete</button>
+				</nav>
+				<nav style="border: 1px solid #5c5d5e; flex: 1;">
+					<menu style="">
+						<li><button>particles and stuff</button></li>
+					</menu>
+				</nav>
+			</aside>
+		</main>
+
+	</div>
+	<script type="module" src="./dist/main.js"></script>
 	<noscript>You will need javascript enabled to use this</noscript>
 </body>
 
