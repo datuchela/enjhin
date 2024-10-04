@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Enjhin editor</title>
+</head>
+
+<body>
+	<main style="display: flex;">
+		<div>
+			<div style="display: flex; justify-content: space-between;">
+				<ul>
+					<li>
+						<button id="new-body-btn">New Body</button>
+					</li>
+					<li>
+						<button id="insert-mode-btn">INSERT MODE</button>
+					</li>
+					<ul>
+						<button id="export-btn">Export</button>
+			</div>
+			<canvas id="enjhin-editor"></canvas>
+		</div>
+		<div>
+			<h2>Bodies</h2>
+			<ul id="body-list">
+			</ul>
+			<div>
+				<select id="body-select">
+				</select>
+				<select id="particle-select1">
+				</select>
+				<select id="particle-select2">
+				</select>
+				<button id="attach-btn">Attach</button>
+			</div>
+		</div>
+	</main>
+	<script src="./dist/main.js"></script>
+	<noscript>You will need javascript enabled to use this</noscript>
+</body>
+
+</html>
