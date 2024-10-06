@@ -22,7 +22,7 @@ ifeq ($(OS_FOR), windows)
 	CFLAGS := -Wall -I$(INCLUDE_PATH)
 	LDFLAGS := -L$(LIB_PATH) -Wl,-R$(LIB_PATH) -lraylib -lm -lpthread -lgdi32 -lwinmm
 ifeq ($(OS_FROM), linux)
-        CC := x86_64-w64-mingw32-gcc
+        CC := x86_64-w64-mingw32-cc
     endif
 endif
 
