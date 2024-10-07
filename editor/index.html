@@ -3,51 +3,37 @@
 
 <head>
 	<title>Enjhin editor</title>
-	<style>
-		*,
-		*::before,
-		*::after {
-			margin: 0;
-			padding: 0;
-			box-sizing: border-box;
-		}
-	</style>
+	<link href="./dist/output.css" rel="stylesheet">
 </head>
 
-<body style="background-color: #161718; color: #d3d3d3;">
-	<div style="padding: .75rem; display: flex; flex-direction: column; gap: .5rem;">
-		<main style="display: flex; gap: .5rem;">
-			<div style="display: flex; flex-direction: column; gap: .5rem;">
-				<nav
-					style="padding: .25rem; border: 1px solid #5c5d5e; display: flex; justify-content: space-between;">
-					<menu style=" display: flex; gap: 0.5rem; list-style: none;">
-						<li><button style="padding: .125em .25em;"
-								id="mode-select">Select</button></li>
-						<li><button style="padding: .125em .25em;"
-								id="mode-insert">Insert</button></li>
-						<li><button style="padding: .125em .25em;" id="mode-move">Move</button>
+<body class="text-[#d3d3d3] bg-[#161718]">
+	<div class="flex flex-col gap-2 p-3">
+		<main class="flex gap-2">
+			<div class="flex flex-col gap-2">
+				<nav class="p-1 flex justify-between border-default">
+					<menu class="flex gap-2 list-none">
+						<li><button class="px-1 py-0.5" id="mode-select">Select</button></li>
+						<li><button class="px-1 py-0.5" id="mode-insert">Insert</button></li>
+						<li><button class="px-1 py-0.5" id="mode-move">Move</button>
+						<li><button class="px-1 py-0.5" id="mode-connect">Connect</button>
 						</li>
 					</menu>
-					<button style="padding: .125em .25em;" id="export">Export</button>
+					<button class="px-2 py-0" id="export">Export</button>
 				</nav>
-				<canvas style="border: 1px solid #5c5d5e;" id="enjhin-editor"></canvas>
+				<canvas class="border-default" id="enjhin-editor"></canvas>
 			</div>
-			<aside style="flex-grow: 1; display: flex; flex-direction: column; gap: .5rem;">
-
-				<nav
-					style="padding: .25rem; border: 1px solid #5c5d5e; display: flex; justify-content: space-between;">
-					<menu style=" display: flex; gap: 0.5rem; list-style: none;">
+			<aside class="grow flex flex-col gap-2">
+				<nav class="p-1 flex justify-between border-default">
+					<menu class="flex gap-2 list-none">
 						<li>
-							<button style="padding: .125em .25em;" id="new-body">New
-								body</button>
+							<button class="px-1 py-0.5" id="new-body">New body</button>
 						</li>
-						<li><button style="padding: .125em .25em;" id="btn">btn</button></li>
+						<li><button class="px-1 py-0.5" id="btn">btn</button></li>
 					</menu>
-					<button style="padding: .125em .25em;" id="export">Delete</button>
+					<button class="px-1 py-0.5" id="export">Delete</button>
 				</nav>
-				<nav style="border: 1px solid #5c5d5e; flex: 1;">
-					<menu style="">
-						<li><button>particles and stuff</button></li>
+				<nav class="flex-1 border-default">
+					<menu class="flex-1 list-none" id="list-view">
 					</menu>
 				</nav>
 			</aside>
