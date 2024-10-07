@@ -2,6 +2,7 @@ export enum Mode {
   SELECT,
   INSERT,
   MOVE,
+  CONNECT,
 };
 
 export type Color = string | CanvasGradient | CanvasPattern;
@@ -48,13 +49,13 @@ export type State = {
   element: {
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
+    listView: HTMLMenuElement;
   }
   buttons: { mode: Mode, element: HTMLButtonElement }[];
   idDispatcher: {
     bodyIdCounter: number,
     springIdCounter: number,
     particleIdCounter: number,
-    getNewId: (idCounter: number) => number;
   }
 }
 
