@@ -1,8 +1,11 @@
 #include "debug.h"
 #include "fizziks.h"
+#include "jansson.h"
 #include "raygui.h"
 #include "raylib.h"
 #include <raymath.h>
+#include <stdio.h>
+#include <string.h>
 
 const float epsilon = EPSILON;
 const Color NODE_COLOR = YELLOW;
@@ -32,9 +35,86 @@ const int WINDOW_WIDTH = 1366;
 const int WINDOW_HEIGHT = 800;
 Font font;
 
+Particle *GetParticleById(const char *id, Particle *particles,
+                          size_t particles_length)
+{
+    Particle *particle = NULL;
+    for (size_t i = 0; i < particles_length; ++i)
+        {
+            if (strcmp(id, particles[i].id) == 0)
+                {
+                    particle = &particles[i];
+                    return particle;
+                }
+        }
+    return particle;
+}
+
 int main(int _argc, char *_argv[])
 {
-    int soft_bodies_length = 2;
+    const char *file_path = _argv[1];
+    json_t *root;
+    json_error_t error;
+
+    root = json_load_file(file_path, 0, &error);
+
+    if (!root)
+        {
+            fprintf(stderr, "error: on line %d: %s\n", error.line, error.text);
+            return 1;
+        }
+
+    json_t *particles_json = json_object_get(root, "particles");
+    json_t *springs_json = json_object_get(root, "springs");
+
+    size_t particles_length = json_array_size(particles_json);
+    Particle particles[particles_length];
+
+    size_t springs_length = json_array_size(springs_json);
+    Spring springs[springs_length];
+
+    json_t *particle_json;
+    json_t *spring_json;
+
+    for (size_t i = 0; i < particles_length; ++i)
+        {
+            particle_json = json_array_get(particles_json, i);
+            const char *particle_id
+                = json_string_value(json_object_get(particle_json, "id"));
+
+            json_t *position_arr = json_object_get(
+                json_object_get(particle_json, "position"), "vector");
+            float position_x
+                = json_real_value(json_array_get(position_arr, 0));
+            float position_y
+                = json_real_value(json_array_get(position_arr, 1));
+
+            particles[i] = CreateParticle(
+                particle_id, (Vector2){ position_x, position_y }, 5.0);
+        }
+
+    for (size_t i = 0; i < springs_length; ++i)
+        {
+
+            spring_json = json_array_get(springs_json, i);
+            json_t *particles_json = json_object_get(spring_json, "particles");
+            json_t *p1_json = json_array_get(particles_json, 0);
+            json_t *p2_json = json_array_get(particles_json, 1);
+            const char *p1_id
+                = json_string_value(json_object_get(p1_json, "id"));
+            const char *p2_id
+                = json_string_value(json_object_get(p2_json, "id"));
+
+            Particle *p1_ptr
+                = GetParticleById(p1_id, particles, particles_length);
+            Particle *p2_ptr
+                = GetParticleById(p2_id, particles, particles_length);
+
+            springs[i]
+                = CreateSpring(p1_ptr, p2_ptr, DEFAULT_SPRING_STIFFNESS);
+        }
+
+    int soft_bodies_length = 3;
     SoftBody soft_bodies[soft_bodies_length] = {};
 
     Particle particles1[4];
@@ -46,6 +126,9 @@ int main(int _argc, char *_argv[])
                  DEFAULT_SPRING_STIFFNESS, 2, false);
     CreateSquare(&soft_bodies[1], particles2, springs2, 350, 350, 100, 10,
                  DEFAULT_SPRING_STIFFNESS, 2, true);
+
+    soft_bodies[2]
+        = CreateSoftBody(particles, particles_length, springs, springs_length);
 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Enjhin");
     SetTargetFPS(165);
@@ -121,10 +204,12 @@ int main(int _argc, char *_argv[])
 
             if (!is_paused)
                 {
-                    AttachMouseControls(soft_bodies, 2, &mouse_state);
+                    AttachMouseControls(soft_bodies, soft_bodies_length,
+                                        &mouse_state);
 
                     ResetSoftBodyCollisions(&soft_bodies[0]);
                     ResetSoftBodyCollisions(&soft_bodies[1]);
+                    ResetSoftBodyCollisions(&soft_bodies[2]);
                     DetectCollisionSoftBodies(&soft_bodies[0],
                                               &soft_bodies[1]);
                     DetectCollisionSoftBodies(&soft_bodies[1],
@@ -132,8 +217,10 @@ int main(int _argc, char *_argv[])
 
                     UpdateSoftBody(&soft_bodies[0], dt);
                     UpdateSoftBody(&soft_bodies[1], dt);
+                    UpdateSoftBody(&soft_bodies[2], dt);
                     BoundaryCollisionBox(world_boundary, &soft_bodies[0]);
                     BoundaryCollisionBox(world_boundary, &soft_bodies[1]);
+                    BoundaryCollisionBox(world_boundary, &soft_bodies[2]);
                 }
 
             BeginDrawing();
@@ -142,6 +229,7 @@ int main(int _argc, char *_argv[])
             DrawFPS(10, 10);
             DrawSoftBody(&soft_bodies[0]);
             DrawSoftBody(&soft_bodies[1]);
+            DrawSoftBody(&soft_bodies[2]);
 
             if (is_paused)
                 DrawTextEx(font, "PAUSED",
@@ -158,10 +246,10 @@ int main(int _argc, char *_argv[])
 
             DEBUG_Draw_Stats(constants, constants_length, (Vector2){ 10, 40 });
 
-            DEBUG_Draw_Particle_Stats(&soft_bodies[0],
-                                      (Vector2){ GetScreenWidth() - 400, 10 });
-            DEBUG_Draw_Particle_Stats(
-                &soft_bodies[1], (Vector2){ GetScreenWidth() - 400, 280 });
+            // DEBUG_Draw_Particle_Stats(&soft_bodies[0],
+            //(Vector2){ GetScreenWidth() - 400, 10 });
+            // DEBUG_Draw_Particle_Stats(
+            //&soft_bodies[1], (Vector2){ GetScreenWidth() - 400, 280 });
 
             EndDrawing();
         }

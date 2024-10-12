@@ -64,8 +64,8 @@ typedef struct Particle
     float mass;
     bool is_colliding;
 
-    int debug_id;
     int num_intesecting;
+    const char *id;
 } Particle;
 
 typedef struct Spring
@@ -113,7 +113,7 @@ void DampenSpring(Spring *spring, Vector2 tension_direction);
 void UpdateAllSprings(Spring *springs, int springs_length);
 void DrawAllSprings(Spring *springs, int springs_length);
 
-Particle CreateParticle(Vector2 position, float mass);
+Particle CreateParticle(const char *id, Vector2 position, float mass);
 void UpdateParticle(Particle *particle, double dt);
 void DrawParticle(Particle *particle);
 
@@ -161,9 +161,9 @@ void ResetSoftBodyCollisions(SoftBody *soft_body);
 int GetSegmentIntersectionAmount(Segment segment1, Segment segment2);
 
 // Methods To Create Simple Shapes
-void CreateSquare(SoftBody *soft_body, Particle *particles, Spring *springs, float init_x,
-                      float init_y, float width, float part_mass,
-                      float stiffness, int num_diagonals,
-                      bool flag_right_diagonal);
+void CreateSquare(SoftBody *soft_body, Particle *particles, Spring *springs,
+                  float init_x, float init_y, float width, float part_mass,
+                  float stiffness, int num_diagonals,
+                  bool flag_right_diagonal);
 
 #endif /* FIZZIKS_H */

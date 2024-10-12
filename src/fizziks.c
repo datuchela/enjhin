@@ -352,12 +352,12 @@ void UpdateSpring(Spring *spring)
     Vector2 tension1 = Vector2Scale(tension_direction, delta_length);
 
     // TODO: use springs stiffness instead of default value
-    spring->particles[0]->force
-        = Vector2Add(spring->particles[0]->force,
-                     Vector2Scale(tension0, variable_constants.spring_stiffness));
-    spring->particles[1]->force
-        = Vector2Add(spring->particles[1]->force,
-                     Vector2Scale(tension1, variable_constants.spring_stiffness));
+    spring->particles[0]->force = Vector2Add(
+        spring->particles[0]->force,
+        Vector2Scale(tension0, variable_constants.spring_stiffness));
+    spring->particles[1]->force = Vector2Add(
+        spring->particles[1]->force,
+        Vector2Scale(tension1, variable_constants.spring_stiffness));
 
     DampenSpring(spring, tension_direction);
 }
@@ -401,10 +401,17 @@ void DrawAllSprings(Spring *springs, int springs_length)
         }
 }
 
-Particle CreateParticle(Vector2 position, float mass)
+Particle CreateParticle(const char *id, Vector2 position, float mass)
 {
-    Particle particle = { position,      Vector2Zero(), Vector2Zero(),
-                          Vector2Zero(), mass,          false };
+    Particle particle = {
+        .id = id,
+        .position = position,
+        .velocity = Vector2Zero(),
+        .acceleration = Vector2Zero(),
+        .force = Vector2Zero(),
+        .mass = mass,
+        .is_colliding = false,
+    };
     return particle;
 }
 
@@ -422,7 +429,8 @@ void DrawParticle(Particle *particle)
         {
             draw_color = RED;
         }
-    DrawCircleV(particle->position, variable_constants.node_radius, draw_color);
+    DrawCircleV(particle->position, variable_constants.node_radius,
+                draw_color);
 }
 
 void ResetParticleForces(Particle *particle)
@@ -446,13 +454,15 @@ void UpdateParticleVelocity(Particle *particle, double dt)
 
 void AddParticleFriction(Particle *particle)
 {
-    particle->velocity = Vector2Scale(particle->velocity, 1 - variable_constants.friction);
+    particle->velocity
+        = Vector2Scale(particle->velocity, 1 - variable_constants.friction);
 }
 
 void ClampParticleVelocity(Particle *particle)
 {
     particle->velocity = Vector2ClampValue(
-        particle->velocity, -variable_constants.max_velocity_value, variable_constants.max_velocity_value);
+        particle->velocity, -variable_constants.max_velocity_value,
+        variable_constants.max_velocity_value);
 }
 
 void UpdateParticlePosition(Particle *particle, double dt)
@@ -586,28 +596,31 @@ void DrawSoftBody(SoftBody *soft_body)
     for (int i = 0; i < soft_body->springs_length; i++)
         {
             DrawSpring(&soft_body->springs[i]);
-            DrawParticle(soft_body->springs[i].particles[0]);
-            DrawParticle(soft_body->springs[i].particles[1]);
+        }
+    for (int i = 0; i < soft_body->particles_length; ++i)
+        {
+            DrawAllParticles(soft_body->particles,
+                             soft_body->particles_length);
         }
 }
 
 // Methods for Simple Shapes
-void CreateSquare(SoftBody *soft_body, Particle *particles, Spring *springs, float init_x,
-                      float init_y, float width, float part_mass,
-                      float stiffness, int num_diagonals,
-                      bool flag_right_diagonal)
+void CreateSquare(SoftBody *soft_body, Particle *particles, Spring *springs,
+                  float init_x, float init_y, float width, float part_mass,
+                  float stiffness, int num_diagonals, bool flag_right_diagonal)
 {
     assert(num_diagonals < 3);
 
     int num_vertices = 4;
 
-    particles[0] = CreateParticle((Vector2){ init_x, init_y }, part_mass);
+    particles[0]
+        = CreateParticle("p1", (Vector2){ init_x, init_y }, part_mass);
     particles[1]
-        = CreateParticle((Vector2){ init_x + width, init_y }, part_mass);
-    particles[2] = CreateParticle((Vector2){ init_x + width, init_y + width },
-                                  part_mass);
+        = CreateParticle("p2", (Vector2){ init_x + width, init_y }, part_mass);
+    particles[2] = CreateParticle(
+        "p3", (Vector2){ init_x + width, init_y + width }, part_mass);
     particles[3]
-        = CreateParticle((Vector2){ init_x, init_y + width }, part_mass);
+        = CreateParticle("p4", (Vector2){ init_x, init_y + width }, part_mass);
 
     springs[0] = CreateSpring(&particles[0], &particles[1], stiffness);
     springs[1] = CreateSpring(&particles[1], &particles[2], stiffness);
@@ -639,5 +652,5 @@ void CreateSquare(SoftBody *soft_body, Particle *particles, Spring *springs, flo
                            &particles[order_for_diagonals[3]], stiffness);
 
     *soft_body = CreateSoftBody(particles, num_vertices, springs,
-                          num_vertices + num_diagonals);
+                                num_vertices + num_diagonals);
 }
