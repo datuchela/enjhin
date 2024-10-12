@@ -4,11 +4,18 @@ OUT := enjhin
 
 # Default to Linux settings
 CC := cc
-INCLUDE_PATH := ./raylib/raylib-5.0_linux_amd64/include
-LIB_PATH := ./raylib/raylib-5.0_linux_amd64/lib
 
-CFLAGS := -Wall -I$(INCLUDE_PATH)
-LDFLAGS := -L$(LIB_PATH) -Wl,-R$(LIB_PATH) -l:libraylib.a -lm -lpthread
+INCLUDE_PATH_RAYLIB := ./raylib/raylib-5.0_linux_amd64/include
+LIB_PATH_RAYLIB := ./raylib/raylib-5.0_linux_amd64/lib
+INCLUDE_PATH := ./include
+LIB_PATH := ./lib
+
+CFLAGS := -Wall
+CFLAGS += -I$(INCLUDE_PATH)
+CFLAGS += -I$(INCLUDE_PATH_RAYLIB)
+
+LDFLAGS := -L$(LIB_PATH) -Wl,-R$(LIB_PATH) -l:libjansson.a
+LDFLAGS += -L$(LIB_PATH_RAYLIB) -Wl,-R$(LIB_PATH_RAYLIB) -l:libraylib.a -lm -lpthread
 
 # Detect source and target OS
 OS_FROM := linux
@@ -17,10 +24,10 @@ OS_FOR := linux
 # Parse flags (e.g., make OS_FROM=linux OS_FOR=windows)
 ifeq ($(OS_FOR), windows)
 	OUT := $(OUT).exe
-	INCLUDE_PATH := ./raylib/raylib-5.0_win64_mingw-w64/include
-	LIB_PATH := ./raylib/raylib-5.0_win64_mingw-w64/lib
-	CFLAGS := -Wall -I$(INCLUDE_PATH)
-	LDFLAGS := -L$(LIB_PATH) -Wl,-R$(LIB_PATH) -lraylib -lm -lpthread -lgdi32 -lwinmm
+	INCLUDE_PATH_RAYLIB := ./raylib/raylib-5.0_win64_mingw-w64/include
+	LIB_PATH_RAYLIB := ./raylib/raylib-5.0_win64_mingw-w64/lib
+	CFLAGS := -Wall -I$(INCLUDE_PATH_RAYLIB)
+	LDFLAGS := -L$(LIB_PATH_RAYLIB) -Wl,-R$(LIB_PATH_RAYLIB) -lraylib -lm -lpthread -lgdi32 -lwinmm
 ifeq ($(OS_FROM), linux)
         CC := x86_64-w64-mingw32-gcc
     endif
