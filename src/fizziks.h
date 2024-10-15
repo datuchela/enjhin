@@ -5,9 +5,11 @@
 #define EPSILON 0.0001f
 #endif
 
+#include "jansson.h"
 #include "raylib.h"
 #include "raymath.h"
 #include <float.h>
+#include <stdio.h>
 
 #define LENGTH(arr) sizeof(arr) / sizeof(arr[0])
 
@@ -96,6 +98,14 @@ typedef struct MouseState
     Rectangle deadzone;
 } MouseState;
 
+typedef struct JsonSoftBody
+{
+    json_t *particles_json;
+    json_t *springs_json;
+    size_t *particles_length;
+    size_t *springs_length;
+} JsonSoftBody;
+
 // Math Functions
 // Proper Arithmetic Comparators
 bool LessOrEquals(float a, float b);
@@ -160,10 +170,24 @@ void BoundaryCollisionBox(Rectangle box, SoftBody *soft_body);
 void ResetSoftBodyCollisions(SoftBody *soft_body);
 int GetSegmentIntersectionAmount(Segment segment1, Segment segment2);
 
+void ResetCollisions(SoftBody *soft_bodies, size_t soft_bodies_length);
+void Collisions(SoftBody *soft_bodies, size_t soft_bodies_length);
+void UpdateSoftBodies(SoftBody *soft_bodies, size_t soft_bodies_length,
+                      double dt);
+void BoundaryCollisionBoxAll(SoftBody *soft_bodies, size_t soft_bodies_length,
+                             Rectangle box);
+void DrawSoftBodies(SoftBody *soft_bodies, size_t soft_bodies_length);
+
+Particle *GetParticleById(const char *id, Particle *particles,
+                          size_t particles_length);
+
+int JsonParseSoftBody(const char *file_path, JsonSoftBody *soft_body_json);
+void JsonInitSoftBody(const char *file_path, SoftBody *soft_body,
+                      JsonSoftBody *soft_body_json);
+
 // Methods To Create Simple Shapes
-void CreateSquare(SoftBody *soft_body, Particle *particles, Spring *springs,
-                  float init_x, float init_y, float width, float part_mass,
-                  float stiffness, int num_diagonals,
-                  bool flag_right_diagonal);
+void InitSquare(SoftBody *soft_body, Particle *particles, Spring *springs,
+                float init_x, float init_y, float width, float part_mass,
+                float stiffness, int num_diagonals, bool flag_right_diagonal);
 
 #endif /* FIZZIKS_H */

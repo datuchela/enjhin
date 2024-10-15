@@ -1,6 +1,5 @@
 #include "debug.h"
 #include "fizziks.h"
-#include "jansson.h"
 #include "raygui.h"
 #include "raylib.h"
 #include <raymath.h>
@@ -13,7 +12,7 @@ const float SIMULATION_SPEED = 2.0;
 const float MAX_VELOCITY_VALUE = 5000;
 const float NODE_RADIUS = 5.0;
 const float SPRING_THICKNESS = 2.5;
-const float DEFAULT_SPRING_STIFFNESS = 400.0;
+const float DEFAULT_SPRING_STIFFNESS = 700.0;
 const float DEFAULT_SPRING_DAMPENING = 50.0;
 const float FRICTION = 0.0075;
 const Vector2 DEFAULT_GRAVITY = { 0, 100.0 };
@@ -31,90 +30,64 @@ VariableConstants variable_constants = {
     .gravity = DEFAULT_GRAVITY,
 };
 
+DebugInfo *constants[] = {
+    &((DebugInfo){ "FRICTION", &variable_constants.friction, 0.0, 1.0, "%f",
+                   TYPE_EDITABLE, false }),
+    &((DebugInfo){ "SPRING STIFFNESS", &variable_constants.spring_stiffness,
+                   0.0, 9000, "%.1f", TYPE_EDITABLE, false }),
+    &((DebugInfo){ "SPRING DAMPENING", &variable_constants.spring_dampening,
+                   0.0, 900.0, "%.1f", TYPE_EDITABLE, false }),
+    &((DebugInfo){ "MAX VELOCITY", &variable_constants.max_velocity_value, 0.0,
+                   10000, "%.1f", TYPE_EDITABLE, false }),
+    &((DebugInfo){ "GRAVITY (HOR)", &variable_constants.gravity.x, -5000, 5000,
+                   "%.1f", TYPE_EDITABLE, false }),
+    &((DebugInfo){ "GRAVITY (VER)", &variable_constants.gravity.y, -5000, 5000,
+                   "%.1f", TYPE_EDITABLE, false }),
+    &((DebugInfo){ "SIMULATION SPEED", &variable_constants.simulation_speed,
+                   0.0, 10.0, "%.1f", TYPE_EDITABLE, false }),
+    &((DebugInfo){ "EPSILON", &variable_constants.epsilon, 0.0, 10.0, "%f",
+                   TYPE_CONSTANT, false }),
+};
+size_t constants_length = LENGTH(constants);
+
 const int WINDOW_WIDTH = 1366;
 const int WINDOW_HEIGHT = 800;
 Font font;
 
-Particle *GetParticleById(const char *id, Particle *particles,
-                          size_t particles_length)
+int main(int argc, char *argv[])
 {
-    Particle *particle = NULL;
-    for (size_t i = 0; i < particles_length; ++i)
+    const char *file_path;
+    if (argc < 2)
         {
-            if (strcmp(id, particles[i].id) == 0)
-                {
-                    particle = &particles[i];
-                    return particle;
-                }
+            file_path = "assets/objects/star.json";
         }
-    return particle;
-}
-
-int main(int _argc, char *_argv[])
-{
-    const char *file_path = _argv[1];
-    json_t *root;
-    json_error_t error;
-
-    root = json_load_file(file_path, 0, &error);
-
-    if (!root)
+    else
         {
-            fprintf(stderr, "error: on line %d: %s\n", error.line, error.text);
-            return 1;
+            file_path = argv[1];
         }
 
-    json_t *particles_json = json_object_get(root, "particles");
-    json_t *springs_json = json_object_get(root, "springs");
+    size_t particles_length;
+    size_t springs_length;
 
-    size_t particles_length = json_array_size(particles_json);
+    JsonSoftBody sb_json;
+    if (JsonParseSoftBody(file_path, &sb_json, &particles_length,
+                          &springs_length)
+        == 1)
+        return 1;
+
     Particle particles[particles_length];
-
-    size_t springs_length = json_array_size(springs_json);
     Spring springs[springs_length];
 
-    json_t *particle_json;
-    json_t *spring_json;
+    SoftBody sb = {
+        .particles = particles,
+        .springs = springs,
+        .particles_length = particles_length,
+        .springs_length = springs_length,
+    };
 
-    for (size_t i = 0; i < particles_length; ++i)
-        {
-            particle_json = json_array_get(particles_json, i);
-            const char *particle_id
-                = json_string_value(json_object_get(particle_json, "id"));
+    JsonInitSoftBody(file_path, &sb, &sb_json);
 
-            json_t *position_arr = json_object_get(
-                json_object_get(particle_json, "position"), "vector");
-            float position_x
-                = json_real_value(json_array_get(position_arr, 0));
-            float position_y
-                = json_real_value(json_array_get(position_arr, 1));
-
-            particles[i] = CreateParticle(
-                particle_id, (Vector2){ position_x, position_y }, 5.0);
-        }
-
-    for (size_t i = 0; i < springs_length; ++i)
-        {
-
-            spring_json = json_array_get(springs_json, i);
-            json_t *particles_json = json_object_get(spring_json, "particles");
-            json_t *p1_json = json_array_get(particles_json, 0);
-            json_t *p2_json = json_array_get(particles_json, 1);
-            const char *p1_id
-                = json_string_value(json_object_get(p1_json, "id"));
-            const char *p2_id
-                = json_string_value(json_object_get(p2_json, "id"));
-
-            Particle *p1_ptr
-                = GetParticleById(p1_id, particles, particles_length);
-            Particle *p2_ptr
-                = GetParticleById(p2_id, particles, particles_length);
-
-            springs[i]
-                = CreateSpring(p1_ptr, p2_ptr, DEFAULT_SPRING_STIFFNESS);
-        }
-
-    int soft_bodies_length = 3;
+    size_t soft_bodies_length = 3;
     SoftBody soft_bodies[soft_bodies_length] = {};
 
     Particle particles1[4];
@@ -122,13 +95,11 @@ int main(int _argc, char *_argv[])
     Spring springs1[6];
     Spring springs2[6];
 
-    CreateSquare(&soft_bodies[0], particles1, springs1, 350, 400, 50, 10,
-                 DEFAULT_SPRING_STIFFNESS, 2, false);
-    CreateSquare(&soft_bodies[1], particles2, springs2, 350, 350, 100, 10,
-                 DEFAULT_SPRING_STIFFNESS, 2, true);
-
-    soft_bodies[2]
-        = CreateSoftBody(particles, particles_length, springs, springs_length);
+    soft_bodies[1] = sb;
+    InitSquare(&soft_bodies[2], particles1, springs1, 350, 400, 50, 10,
+               DEFAULT_SPRING_STIFFNESS, 2, false);
+    InitSquare(&soft_bodies[0], particles2, springs2, 350, 350, 100, 10,
+               DEFAULT_SPRING_STIFFNESS, 2, true);
 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Enjhin");
     SetTargetFPS(165);
@@ -139,32 +110,9 @@ int main(int _argc, char *_argv[])
 
     float dt;
 
-    DebugInfo *constants[] = {
-        &((DebugInfo){ "FRICTION", &variable_constants.friction, 0.0, 1.0,
-                       "%f", TYPE_EDITABLE, false }),
-        &((DebugInfo){ "SPRING STIFFNESS",
-                       &variable_constants.spring_stiffness, 0.0, 9000, "%.1f",
-                       TYPE_EDITABLE, false }),
-        &((DebugInfo){ "SPRING DAMPENING",
-                       &variable_constants.spring_dampening, 0.0, 900.0,
-                       "%.1f", TYPE_EDITABLE, false }),
-        &((DebugInfo){ "MAX VELOCITY", &variable_constants.max_velocity_value,
-                       0.0, 10000, "%.1f", TYPE_EDITABLE, false }),
-        &((DebugInfo){ "GRAVITY (HOR)", &variable_constants.gravity.x, -5000,
-                       5000, "%.1f", TYPE_EDITABLE, false }),
-        &((DebugInfo){ "GRAVITY (VER)", &variable_constants.gravity.y, -5000,
-                       5000, "%.1f", TYPE_EDITABLE, false }),
-        &((DebugInfo){ "SIMULATION SPEED",
-                       &variable_constants.simulation_speed, 0.0, 10.0, "%.1f",
-                       TYPE_EDITABLE, false }),
-        &((DebugInfo){ "EPSILON", &variable_constants.epsilon, 0.0, 10.0, "%f",
-                       TYPE_CONSTANT, false }),
-        &((DebugInfo){ "dt", &dt, 0.0, 10.0, "%f", TYPE_CONSTANT, false }),
-    };
-    int constants_length = LENGTH(constants);
-
     Rectangle world_boundary = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT - 4 };
     MouseState mouse_state = { 0 };
+
     // Deadzone for GUI controls, hardcoded for now, preferably should be
     // calculated (once) when GUI is drawn.
     mouse_state.deadzone = (Rectangle){ 0, 0, 330, 230 };
@@ -191,13 +139,6 @@ int main(int _argc, char *_argv[])
                         = DEFAULT_SPRING_DAMPENING;
                     variable_constants.friction = FRICTION;
                     variable_constants.gravity = DEFAULT_GRAVITY;
-
-                    CreateSquare(&soft_bodies[0], particles1, springs1, 350,
-                                 400, 50, 10, DEFAULT_SPRING_STIFFNESS, 2,
-                                 false);
-                    CreateSquare(&soft_bodies[1], particles2, springs2, 350,
-                                 350, 100, 10, DEFAULT_SPRING_STIFFNESS, 2,
-                                 true);
                 }
 
             dt = GetFrameTime() * variable_constants.simulation_speed;
@@ -207,29 +148,18 @@ int main(int _argc, char *_argv[])
                     AttachMouseControls(soft_bodies, soft_bodies_length,
                                         &mouse_state);
 
-                    ResetSoftBodyCollisions(&soft_bodies[0]);
-                    ResetSoftBodyCollisions(&soft_bodies[1]);
-                    ResetSoftBodyCollisions(&soft_bodies[2]);
-                    DetectCollisionSoftBodies(&soft_bodies[0],
-                                              &soft_bodies[1]);
-                    DetectCollisionSoftBodies(&soft_bodies[1],
-                                              &soft_bodies[0]);
+                    ResetCollisions(soft_bodies, soft_bodies_length);
+                    Collisions(soft_bodies, soft_bodies_length);
 
-                    UpdateSoftBody(&soft_bodies[0], dt);
-                    UpdateSoftBody(&soft_bodies[1], dt);
-                    UpdateSoftBody(&soft_bodies[2], dt);
-                    BoundaryCollisionBox(world_boundary, &soft_bodies[0]);
-                    BoundaryCollisionBox(world_boundary, &soft_bodies[1]);
-                    BoundaryCollisionBox(world_boundary, &soft_bodies[2]);
+                    UpdateSoftBodies(soft_bodies, soft_bodies_length, dt);
+                    BoundaryCollisionBoxAll(soft_bodies, soft_bodies_length,
+                                            world_boundary);
                 }
 
             BeginDrawing();
             ClearBackground(BLACK);
 
-            DrawFPS(10, 10);
-            DrawSoftBody(&soft_bodies[0]);
-            DrawSoftBody(&soft_bodies[1]);
-            DrawSoftBody(&soft_bodies[2]);
+            DrawSoftBodies(soft_bodies, soft_bodies_length);
 
             if (is_paused)
                 DrawTextEx(font, "PAUSED",
@@ -245,11 +175,7 @@ int main(int _argc, char *_argv[])
                      "[Q] to QUIT");
 
             DEBUG_Draw_Stats(constants, constants_length, (Vector2){ 10, 40 });
-
-            // DEBUG_Draw_Particle_Stats(&soft_bodies[0],
-            //(Vector2){ GetScreenWidth() - 400, 10 });
-            // DEBUG_Draw_Particle_Stats(
-            //&soft_bodies[1], (Vector2){ GetScreenWidth() - 400, 280 });
+            DrawFPS(10, 10);
 
             EndDrawing();
         }
