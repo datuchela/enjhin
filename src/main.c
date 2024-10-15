@@ -13,9 +13,9 @@ const float MAX_VELOCITY_VALUE = 5000;
 const float NODE_RADIUS = 5.0;
 const float SPRING_THICKNESS = 2.5;
 const float DEFAULT_SPRING_STIFFNESS = 700.0;
-const float DEFAULT_SPRING_DAMPENING = 50.0;
+const float DEFAULT_SPRING_DAMPENING = 40.0;
 const float FRICTION = 0.0075;
-const Vector2 DEFAULT_GRAVITY = { 0, 100.0 };
+const Vector2 DEFAULT_GRAVITY = { 0, 150.0 };
 
 VariableConstants variable_constants = {
     .epsilon = epsilon,
