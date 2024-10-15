@@ -69,7 +69,11 @@ int main(int argc, char *argv[])
     size_t particles_length;
     size_t springs_length;
 
-    JsonSoftBody sb_json;
+    JsonSoftBody sb_json = {
+        .particles_length = &particles_length,
+        .springs_length = &springs_length,
+    };
+
     if (JsonParseSoftBody(file_path, &sb_json) == 1)
         return 1;
 
