@@ -1,7 +1,10 @@
 #include "fizziks.h"
 #include "raylib.h"
 #include <assert.h>
+#include <jansson.h>
 #include <raymath.h>
+#include <stdio.h>
+#include <string.h>
 
 bool LessOrEquals(float a, float b)
 {
@@ -352,12 +355,12 @@ void UpdateSpring(Spring *spring)
     Vector2 tension1 = Vector2Scale(tension_direction, delta_length);
 
     // TODO: use springs stiffness instead of default value
-    spring->particles[0]->force
-        = Vector2Add(spring->particles[0]->force,
-                     Vector2Scale(tension0, variable_constants.spring_stiffness));
-    spring->particles[1]->force
-        = Vector2Add(spring->particles[1]->force,
-                     Vector2Scale(tension1, variable_constants.spring_stiffness));
+    spring->particles[0]->force = Vector2Add(
+        spring->particles[0]->force,
+        Vector2Scale(tension0, variable_constants.spring_stiffness));
+    spring->particles[1]->force = Vector2Add(
+        spring->particles[1]->force,
+        Vector2Scale(tension1, variable_constants.spring_stiffness));
 
     DampenSpring(spring, tension_direction);
 }
@@ -401,10 +404,17 @@ void DrawAllSprings(Spring *springs, int springs_length)
         }
 }
 
-Particle CreateParticle(Vector2 position, float mass)
+Particle CreateParticle(const char *id, Vector2 position, float mass)
 {
-    Particle particle = { position,      Vector2Zero(), Vector2Zero(),
-                          Vector2Zero(), mass,          false };
+    Particle particle = {
+        .id = id,
+        .position = position,
+        .velocity = Vector2Zero(),
+        .acceleration = Vector2Zero(),
+        .force = Vector2Zero(),
+        .mass = mass,
+        .is_colliding = false,
+    };
     return particle;
 }
 
@@ -422,7 +432,8 @@ void DrawParticle(Particle *particle)
         {
             draw_color = RED;
         }
-    DrawCircleV(particle->position, variable_constants.node_radius, draw_color);
+    DrawCircleV(particle->position, variable_constants.node_radius,
+                draw_color);
 }
 
 void ResetParticleForces(Particle *particle)
@@ -446,13 +457,15 @@ void UpdateParticleVelocity(Particle *particle, double dt)
 
 void AddParticleFriction(Particle *particle)
 {
-    particle->velocity = Vector2Scale(particle->velocity, 1 - variable_constants.friction);
+    particle->velocity
+        = Vector2Scale(particle->velocity, 1 - variable_constants.friction);
 }
 
 void ClampParticleVelocity(Particle *particle)
 {
     particle->velocity = Vector2ClampValue(
-        particle->velocity, -variable_constants.max_velocity_value, variable_constants.max_velocity_value);
+        particle->velocity, -variable_constants.max_velocity_value,
+        variable_constants.max_velocity_value);
 }
 
 void UpdateParticlePosition(Particle *particle, double dt)
@@ -586,28 +599,46 @@ void DrawSoftBody(SoftBody *soft_body)
     for (int i = 0; i < soft_body->springs_length; i++)
         {
             DrawSpring(&soft_body->springs[i]);
-            DrawParticle(soft_body->springs[i].particles[0]);
-            DrawParticle(soft_body->springs[i].particles[1]);
+        }
+    for (int i = 0; i < soft_body->particles_length; ++i)
+        {
+            DrawAllParticles(soft_body->particles,
+                             soft_body->particles_length);
         }
 }
 
+Particle *GetParticleById(const char *id, Particle *particles,
+                          size_t particles_length)
+{
+    Particle *particle = NULL;
+    for (size_t i = 0; i < particles_length; ++i)
+        {
+            if (strcmp(id, particles[i].id) == 0)
+                {
+                    particle = &particles[i];
+                    return particle;
+                }
+        }
+    return particle;
+}
+
 // Methods for Simple Shapes
-void CreateSquare(SoftBody *soft_body, Particle *particles, Spring *springs, float init_x,
-                      float init_y, float width, float part_mass,
-                      float stiffness, int num_diagonals,
-                      bool flag_right_diagonal)
+void InitSquare(SoftBody *soft_body, Particle *particles, Spring *springs,
+                float init_x, float init_y, float width, float part_mass,
+                float stiffness, int num_diagonals, bool flag_right_diagonal)
 {
     assert(num_diagonals < 3);
 
     int num_vertices = 4;
 
-    particles[0] = CreateParticle((Vector2){ init_x, init_y }, part_mass);
+    particles[0]
+        = CreateParticle("p1", (Vector2){ init_x, init_y }, part_mass);
     particles[1]
-        = CreateParticle((Vector2){ init_x + width, init_y }, part_mass);
-    particles[2] = CreateParticle((Vector2){ init_x + width, init_y + width },
-                                  part_mass);
+        = CreateParticle("p2", (Vector2){ init_x + width, init_y }, part_mass);
+    particles[2] = CreateParticle(
+        "p3", (Vector2){ init_x + width, init_y + width }, part_mass);
     particles[3]
-        = CreateParticle((Vector2){ init_x, init_y + width }, part_mass);
+        = CreateParticle("p4", (Vector2){ init_x, init_y + width }, part_mass);
 
     springs[0] = CreateSpring(&particles[0], &particles[1], stiffness);
     springs[1] = CreateSpring(&particles[1], &particles[2], stiffness);
@@ -639,5 +670,132 @@ void CreateSquare(SoftBody *soft_body, Particle *particles, Spring *springs, flo
                            &particles[order_for_diagonals[3]], stiffness);
 
     *soft_body = CreateSoftBody(particles, num_vertices, springs,
-                          num_vertices + num_diagonals);
+                                num_vertices + num_diagonals);
+}
+
+void ResetCollisions(SoftBody *soft_bodies, size_t soft_bodies_length)
+{
+    for (size_t i = 0; i < soft_bodies_length; ++i)
+        {
+            ResetSoftBodyCollisions(&soft_bodies[i]);
+        }
+}
+
+void Collisions(SoftBody *soft_bodies, size_t soft_bodies_length)
+{
+    // WARNING: This is not working as expected.
+    for (size_t i = 0; i < soft_bodies_length; ++i)
+        {
+            for (size_t j = 0; j < soft_bodies_length; ++j)
+                {
+                    if (i != j)
+                        {
+                            DetectCollisionSoftBodies(&soft_bodies[i],
+                                                      &soft_bodies[j]);
+                        }
+                }
+        }
+}
+
+void UpdateSoftBodies(SoftBody *soft_bodies, size_t soft_bodies_length,
+                      double dt)
+{
+    for (size_t i = 0; i < soft_bodies_length; ++i)
+        {
+            UpdateSoftBody(&soft_bodies[i], dt);
+        }
+}
+
+void BoundaryCollisionBoxAll(SoftBody *soft_bodies, size_t soft_bodies_length,
+                             Rectangle box)
+{
+    for (size_t i = 0; i < soft_bodies_length; ++i)
+        {
+            BoundaryCollisionBox(box, &soft_bodies[i]);
+        }
+}
+
+void DrawSoftBodies(SoftBody *soft_bodies, size_t soft_bodies_length)
+{
+    for (size_t i = 0; i < soft_bodies_length; ++i)
+        {
+            DrawSoftBody(&soft_bodies[i]);
+        }
+}
+
+int JsonParseSoftBody(const char *file_path, JsonSoftBody *soft_body_json)
+{
+    json_t *root;
+    json_error_t error;
+
+    root = json_load_file(file_path, 0, &error);
+
+    if (!root)
+        {
+            fprintf(stderr, "error: on line %d: %s\n", error.line, error.text);
+            return 1;
+        }
+
+    soft_body_json->particles_json = json_object_get(root, "particles");
+    soft_body_json->springs_json = json_object_get(root, "springs");
+
+    *soft_body_json->particles_length
+        = json_array_size(soft_body_json->particles_json);
+    *soft_body_json->springs_length
+        = json_array_size(soft_body_json->springs_json);
+
+    return 0;
+}
+
+void JsonInitSoftBody(const char *file_path, SoftBody *soft_body,
+                      JsonSoftBody *soft_body_json)
+{
+
+    json_t *particle_json;
+    json_t *spring_json;
+
+    for (size_t i = 0; i < soft_body->particles_length; ++i)
+        {
+            particle_json = json_array_get(soft_body_json->particles_json, i);
+            const char *particle_id
+                = json_string_value(json_object_get(particle_json, "id"));
+
+            json_t *position_x_json = json_object_get(particle_json, "x");
+            json_t *position_y_json = json_object_get(particle_json, "y");
+
+            float position_x;
+            float position_y;
+
+            if (json_is_real(position_x_json))
+                {
+                    position_x = json_real_value(position_x_json);
+                    position_y = json_real_value(position_y_json);
+                }
+            else
+                {
+                    position_x = json_integer_value(position_x_json);
+                    position_y = json_integer_value(position_y_json);
+                }
+
+            soft_body->particles[i] = CreateParticle(
+                particle_id, (Vector2){ position_x, position_y }, 5.0);
+        }
+
+    for (size_t i = 0; i < soft_body->springs_length; ++i)
+        {
+
+            spring_json = json_array_get(soft_body_json->springs_json, i);
+            const char *p1_id
+                = json_string_value(json_object_get(spring_json, "p1"));
+            const char *p2_id
+                = json_string_value(json_object_get(spring_json, "p2"));
+
+            Particle *p1_ptr = GetParticleById(p1_id, soft_body->particles,
+                                               soft_body->particles_length);
+            Particle *p2_ptr = GetParticleById(p2_id, soft_body->particles,
+                                               soft_body->particles_length);
+
+            soft_body->springs[i]
+                = CreateSpring(p1_ptr, p2_ptr, DEFAULT_SPRING_STIFFNESS);
+        }
 }

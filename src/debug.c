@@ -94,24 +94,3 @@ void DEBUG_Draw_Particle_Stats(SoftBody *soft_body, Vector2 position)
             position = Vector2Add(position, (Vector2){ 0, particle_gap_y });
         }
 }
-
-Particle DEBUG_CreateParticle(Vector2 position, float mass, int id)
-{
-    Particle particle = CreateParticle(position, mass);
-    particle.debug_id = id;
-    return particle;
-}
-
-void DEBUG_Draw_Particle_Ids(SoftBody *soft_body)
-{
-    float offset_x = 15, offset_y = 15;
-    int font_size = 20;
-    Color color = BLUE;
-    for (int i = 0; i < soft_body->particles_length; i++)
-        {
-            DrawText(TextFormat("%i", soft_body->particles[i].debug_id),
-                     soft_body->particles[i].position.x - offset_x,
-                     soft_body->particles[i].position.y - offset_y, font_size,
-                     color);
-        }
-}
