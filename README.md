@@ -1,3 +1,15 @@
+# Give Up GitHub
+
+This project has given up GitHub.  ([See Software Freedom Conservancy's *Give Up  GitHub* site for details](https://GiveUpGitHub.org).)
+
+You can now find this project at [https://codeberg.org/datuch/enjhin](https://codeberg.org/datuch/enjhin) instead.
+
+Any use of this project's code by GitHub Copilot, past or present, is done without our permission.  We do not consent to GitHub's use of this project's code in Copilot.
+
+Join us; you can [give up GitHub](https://GiveUpGitHub.org) too!
+
+![Logo of the GiveUpGitHub campaign](https://sfconservancy.org/static/img/GiveUpGitHub.png)
+
 # Enjhin
 Soft body physics engine in C using [raylib](https://github.com/raysan5/raylib)  
 
@@ -28,18 +40,3 @@ and then you can run `make OS_FOR=windows` to build Windows executable.
 - [merabi0013](https://github.com/merabi0013)
 - [datuchela](https://github.com/datuchela)
 
-## == We're Using GitHub Under Protest ==
-
-This project is currently hosted on GitHub.  This is not ideal; GitHub is a
-proprietary, trade-secret system that is not Free and Open Souce Software
-(FOSS).  We are deeply concerned about using a proprietary system like GitHub
-to develop our FOSS project.  We urge you to read about the
-[Give up GitHub](https://GiveUpGitHub.org) campaign from
-[the Software Freedom Conservancy](https://sfconservancy.org) to understand
-some of the reasons why GitHub is not a good place to host FOSS projects.
-
-Any use of this project's code by GitHub Copilot, past or present, is done
-without our permission.  We do not consent to GitHub's use of this project's
-code in Copilot.
-
-![Logo of the GiveUpGitHub campaign](https://sfconservancy.org/static/img/GiveUpGitHub.png)
