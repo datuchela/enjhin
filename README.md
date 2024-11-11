@@ -28,7 +28,7 @@ and then you can run `make OS_FOR=windows` to build Windows executable.
 - [merabi0013](https://github.com/merabi0013)
 - [datuchela](https://github.com/datuchela)
 
-== We're Using GitHub Under Protest ==
+## == We're Using GitHub Under Protest ==
 
 This project is currently hosted on GitHub.  This is not ideal; GitHub is a
 proprietary, trade-secret system that is not Free and Open Souce Software
